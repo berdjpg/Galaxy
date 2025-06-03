@@ -18,6 +18,11 @@
   },
   "homepage": "https://github.com/berdjpg/Galaxy#readme",
   "dependencies": {
-    "@supabase/supabase-js": "^2.49.9"
+    "@supabase/supabase-js": "^2.49.9",
+    "canvas": "^3.1.0",
+    "sharp": "^0.34.2"
+  },
+  "devDependencies": {
+    "typescript": "^5.8.3"
   }
 }

@@ -1,9 +1,0 @@
-{
-  "name": "RS Galaxy Tracker",
-  "description": "Live location tracker voor RuneScape via Alt1",
-  "version": "1.0.0",
-  "icon": "https://alt1.app/icon.png",
-  "category": "Utility",
-  "entrypoint": "index.html",
-  "id": "rsgalaxy.tracker"
-}
