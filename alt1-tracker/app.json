@@ -1,0 +1,8 @@
+{
+  "name": "RuneScape Galaxy Tracker",
+  "description": "Stuurt je locatie via Alt1 naar je map server.",
+  "category": "Tools",
+  "url": "http://localhost:3000/index.html",
+  "icon": "http://localhost:3000/icon.png",
+  "defaulticon": "app"
+}
