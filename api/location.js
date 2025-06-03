@@ -1,19 +1,20 @@
-const players = global.players || new Map();
-if (!global.players) global.players = players;
+import { createClient } from '@supabase/supabase-js';
+
+const supabase = createClient(
+  process.env.SUPABASE_URL,
+  process.env.SUPABASE_ANON_KEY
+);
 
 export default async function handler(req, res) {
-  if (req.method !== 'POST') {
-    return res.status(405).json({ error: 'Method Not Allowed' });
-  }
+  if (req.method !== 'POST') return res.status(405).end();
 
-  console.log('Received body:', req.body);
   const { rsn, tileX, tileY, timestamp } = req.body;
 
-  if (!rsn || tileX === undefined || tileY === undefined || !timestamp) {
-    return res.status(400).json({ error: "Missing required fields" });
-  }
+  const { error } = await supabase.from('players').upsert([
+    { rsn, tileX, tileY, timestamp }
+  ]);
 
-  players.set(rsn, { rsn, tileX, tileY, timestamp });
+  if (error) return res.status(500).json({ error: error.message });
 
   res.status(200).end();
 }
