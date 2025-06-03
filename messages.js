@@ -7,7 +7,7 @@ export default function handler(req, res) {
 
   // Simuleer een database
   const messageCounts = {
-    '123': 10,
+    '123': 5,
     '456': 42,
   };
 
