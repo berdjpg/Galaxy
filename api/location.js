@@ -24,8 +24,11 @@ export default async function handler(req, res) {
     return res.status(400).json({ error: 'Missing required fields' });
   }
 
+  // Converteer timestamp naar ISO-string (Postgres compatible)
+  const timestampIso = new Date(Number(timestamp)).toISOString();
+
   const { error } = await supabase.from('players').upsert([
-    { rsn, tileX, tileY, timestamp }
+    { rsn, tileX, tileY, timestamp: timestampIso }
   ]);
 
   if (error) {
