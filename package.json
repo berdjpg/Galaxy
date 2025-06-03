@@ -1,0 +1,23 @@
+{
+  "name": "galaxy",
+  "version": "1.0.0",
+  "description": "��#\u0000 \u0000G\u0000a\u0000l\u0000a\u0000x\u0000y\u0000\r\u0000 \u0000",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/berdjpg/Galaxy.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/berdjpg/Galaxy/issues"
+  },
+  "homepage": "https://github.com/berdjpg/Galaxy#readme",
+  "dependencies": {
+    "@supabase/supabase-js": "^2.49.9"
+  }
+}
