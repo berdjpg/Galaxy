@@ -1,12 +1,3 @@
-const express = require('express');
-const cors = require('cors');
-const app = express();
-const port = 3000;
-
-// Middleware om JSON te parsen
-app.use(cors());
-app.use(express.json());
-
 const players = new Map();
 
 app.post('/location', (req, res) => {
@@ -22,9 +13,4 @@ app.post('/location', (req, res) => {
 app.get('/players', (req, res) => {
   const allPlayers = Array.from(players.values());
   res.json(allPlayers);
-});
-
-
-app.listen(port, () => {
-  console.log(`Server listening at http://localhost:${port}`);
 });
