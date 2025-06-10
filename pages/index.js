@@ -35,12 +35,14 @@ export default function Home() {
   const [sortAsc, setSortAsc] = useState(true);
   const [filterText, setFilterText] = useState('');
 
-  // Track hovered member for showing history popup
+  // Track hovered member name and ref of hovered row for popup positioning
   const [hoveredMember, setHoveredMember] = useState(null);
   const [historyData, setHistoryData] = useState([]);
   const [historyLoading, setHistoryLoading] = useState(false);
+  const hoveredRowRef = useRef(null);
 
-  const popupRef = useRef();
+  // Popup position state
+  const [popupStyle, setPopupStyle] = useState({ top: 0, left: 0, opacity: 0 });
 
   useEffect(() => {
     async function fetchData() {
@@ -56,13 +58,13 @@ export default function Home() {
   useEffect(() => {
     if (!hoveredMember) {
       setHistoryData([]);
+      setPopupStyle(style => ({ ...style, opacity: 0 }));
       return;
     }
 
     async function fetchHistory() {
       setHistoryLoading(true);
       try {
-        // Assuming you have an API endpoint to get rank history by member name
         const res = await fetch(`/api/rank_history?member=${encodeURIComponent(hoveredMember)}`);
         if (!res.ok) throw new Error('Failed to fetch history');
         const data = await res.json();
@@ -75,6 +77,38 @@ export default function Home() {
     }
 
     fetchHistory();
+
+    // Position popup near hovered row
+    if (hoveredRowRef.current) {
+      const rowRect = hoveredRowRef.current.getBoundingClientRect();
+      const popupWidth = 320;
+      const popupHeight = 300;
+      const margin = 8;
+      const viewportWidth = window.innerWidth;
+      const viewportHeight = window.innerHeight;
+
+      // Try to position popup above the row
+      let top = rowRect.top + window.scrollY - popupHeight - margin;
+      if (top < window.scrollY) {
+        // Not enough space above, place below
+        top = rowRect.bottom + window.scrollY + margin;
+      }
+
+      // Align left with row but keep in viewport horizontally
+      let left = rowRect.left + window.scrollX;
+      if (left + popupWidth > window.scrollX + viewportWidth) {
+        left = window.scrollX + viewportWidth - popupWidth - margin;
+      }
+      if (left < window.scrollX + margin) {
+        left = window.scrollX + margin;
+      }
+
+      setPopupStyle({
+        top,
+        left,
+        opacity: 1,
+      });
+    }
   }, [hoveredMember]);
 
   const filteredSortedMembers = useMemo(() => {
@@ -124,6 +158,21 @@ export default function Home() {
       ? `${Math.floor(days / 365)} yr${days >= 730 ? 's' : ''}`
       : `${days} day${days !== 1 ? 's' : ''}`;
   };
+
+  // Find rank difference indicator based on historyData (latest change)
+  function getRankIndicator(currentRank) {
+    if (!historyData.length) return null;
+
+    const latestChange = historyData[0]; // assuming history is sorted descending by changed_at
+    if (!latestChange) return null;
+
+    const oldRankVal = rankOrder[(latestChange.old_rank || '').toLowerCase().trim()] || 0;
+    const newRankVal = rankOrder[(latestChange.new_rank || '').toLowerCase().trim()] || 0;
+
+    if (newRankVal > oldRankVal) return <span style={{ color: 'green', marginLeft: 6 }}>{upTriangle}</span>;
+    if (newRankVal < oldRankVal) return <span style={{ color: 'red', marginLeft: 6 }}>{downTriangle}</span>;
+    return null;
+  }
 
   const handleSort = (key) => {
     if (sortKey === key) {
@@ -207,7 +256,10 @@ export default function Home() {
         <tbody>
           {filteredSortedMembers.map(({ name, rank, joined }) => {
             const duration = getMembershipDuration(joined);
-            const currVal = rankOrder[rank?.trim().toLowerCase()] || 0;
+
+            // Show rank indicator only if hovered member matches this name
+            const showIndicator = hoveredMember === name;
+            const rankIndicator = showIndicator ? getRankIndicator(rank) : null;
 
             return (
               <tr
@@ -216,11 +268,20 @@ export default function Home() {
                   borderBottom: '1px solid #eee',
                   cursor: 'pointer',
                 }}
-                onMouseEnter={() => setHoveredMember(name)}
-                onMouseLeave={() => setHoveredMember(null)}
+                onMouseEnter={e => {
+                  setHoveredMember(name);
+                  hoveredRowRef.current = e.currentTarget;
+                }}
+                onMouseLeave={() => {
+                  setHoveredMember(null);
+                  hoveredRowRef.current = null;
+                }}
               >
                 <td style={{ padding: '8px 12px' }}>{name}</td>
-                <td style={{ padding: '8px 12px', whiteSpace: 'nowrap' }}>{rank}</td>
+                <td style={{ padding: '8px 12px', whiteSpace: 'nowrap' }}>
+                  {rank}
+                  {rankIndicator}
+                </td>
                 <td style={{ padding: '8px 12px' }}>{formatDate(joined)}</td>
                 <td style={{ padding: '8px 12px' }}>{duration}</td>
               </tr>
@@ -239,11 +300,10 @@ export default function Home() {
       {/* Popup for rank change history */}
       {hoveredMember && (
         <div
-          ref={popupRef}
           style={{
             position: 'absolute',
-            top: 80,
-            right: 20,
+            top: popupStyle.top,
+            left: popupStyle.left,
             maxWidth: 320,
             backgroundColor: 'white',
             border: '1px solid #ccc',
@@ -254,6 +314,9 @@ export default function Home() {
             zIndex: 100,
             overflowY: 'auto',
             maxHeight: 300,
+            opacity: popupStyle.opacity,
+            transition: 'opacity 0.2s ease',
+            pointerEvents: 'none', // so popup doesn't interfere with hover
           }}
         >
           <strong>Rank Change History for {hoveredMember}</strong>
