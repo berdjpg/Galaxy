@@ -11,10 +11,10 @@ const CLAN_NAME = 'remenant';
 const CLAN_API_URL = `http://services.runescape.com/m=clan-hiscores/members_lite.ws?clanName=${CLAN_NAME}`;
 
 export default async function handler(req, res) {
-  // 🔒 Authorization check
   if (req.headers.authorization !== `Bearer ${CRON_SECRET}`) {
     return res.status(401).json({ error: 'Unauthorized' });
   }
+
   console.log('Cron job triggered at', new Date().toISOString());
 
   try {
@@ -24,12 +24,10 @@ export default async function handler(req, res) {
       return res.status(500).json({ error: 'Failed to fetch clan data' });
     }
 
-    // Read response as buffer and decode with Windows-1252 encoding
     const buffer = Buffer.from(await clanResponse.arrayBuffer());
     const csvText = iconv.decode(buffer, 'win1252');
 
     const lines = csvText.trim().split('\n').filter(line => line.trim() !== '');
-
     if (lines.length < 2) {
       console.error('No member data found in CSV');
       return res.status(500).json({ error: 'No member data found' });
@@ -40,11 +38,10 @@ export default async function handler(req, res) {
     const members = lines.map(line => {
       const cols = line.split(',');
 
-      // Normalize and clean spaces to fix broken characters or spaces
       const name = cols[0]
-        .replace(/\s+/g, ' ')  // Replace any whitespace runs with single space
+        .replace(/\s+/g, ' ')
         .trim()
-        .normalize('NFC');      // Normalize unicode characters (NFC is standard)
+        .normalize('NFC');
 
       const rank = cols[1]
         .trim()
@@ -53,10 +50,10 @@ export default async function handler(req, res) {
       return { name, rank };
     });
 
-    // Fetch existing members from Supabase, including previous_rank etc.
+    // Fetch current data from database
     const { data: existingMembers, error: selectError } = await supabase
       .from('clan_members')
-      .select('name, rank, previous_rank, joined, rank_changed');
+      .select('name, rank, previous_rank, joined');
 
     if (selectError) {
       console.error('Supabase select error:', selectError);
@@ -79,13 +76,12 @@ export default async function handler(req, res) {
       const existing = existingMap[member.name];
 
       if (!existing) {
-        // New member: insert with current timestamp, previous_rank null
+        // New member
         const newMember = {
           name: member.name,
           rank: member.rank,
           previous_rank: null,
           joined: now,
-          rank_changed: false,
         };
 
         const { error: insertError } = await supabase
@@ -99,16 +95,15 @@ export default async function handler(req, res) {
 
         changes.newMembers.push(newMember);
       } else {
-        // Rank change detection
+        // Existing member — check for rank change
         const rankChanged = existing.rank !== member.rank;
 
         if (rankChanged) {
           const { error: updateError } = await supabase
             .from('clan_members')
             .update({
-              previous_rank: existing.rank, // save old rank
               rank: member.rank,
-              rank_changed: true,
+              previous_rank: existing.rank,
             })
             .eq('name', member.name);
 
@@ -123,19 +118,19 @@ export default async function handler(req, res) {
             newRank: member.rank,
             joined: existing.joined,
           });
-        } else if (existing.rank_changed) {
-          // Reset stale rank_changed flag and clear previous_rank
-          await supabase
-            .from('clan_members')
-            .update({ rank_changed: false, previous_rank: null })
-            .eq('name', member.name);
         }
       }
     }
 
-    return res.status(200).json({ changes, totalMembers: members.length });
+    return res.status(200).json({
+      changes,
+      totalMembers: members.length,
+    });
   } catch (err) {
     console.error('Unexpected error:', err);
-    return res.status(500).json({ error: 'Internal server error', details: err.message || err.toString() });
+    return res.status(500).json({
+      error: 'Internal server error',
+      details: err.message || err.toString(),
+    });
   }
 }

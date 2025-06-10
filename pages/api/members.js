@@ -4,7 +4,7 @@ const supabase = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_SER
 
 export default async function handler(req, res) {
   try {
-    // Fetch all members from DB
+    // Fetch all members from the database
     const { data: members, error } = await supabase
       .from('clan_members')
       .select('*')
@@ -12,16 +12,7 @@ export default async function handler(req, res) {
 
     if (error) throw error;
 
-    // Mark rank_changed based on some logic or saved state
-    // For simplicity, here we just add false for now
-    // You can adjust this if you track changes in another table or field
-
-    const membersWithChanges = members.map(m => ({
-      ...m,
-      rank_changed: false, // or your logic here
-    }));
-
-    res.status(200).json(membersWithChanges);
+    res.status(200).json(members);
   } catch (error) {
     console.error(error);
     res.status(500).json({ error: 'Internal server error' });
