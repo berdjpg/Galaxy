@@ -1,6 +1,4 @@
-
 import { createClient } from '@supabase/supabase-js';
-
 
 const SUPABASE_URL = process.env.SUPABASE_URL;
 const SUPABASE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY;
@@ -42,6 +40,7 @@ export default async function handler(req, res) {
       };
     });
 
+    // Fetch existing members from Supabase
     const { data: existingMembers, error: selectError } = await supabase
       .from('clan_members')
       .select('name, rank, joined, rank_changed');
