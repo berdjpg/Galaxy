@@ -32,14 +32,13 @@ export default async function handler(req, res) {
       return {
         name: cols[0].trim(),
         rank: cols[1].trim(),
-        // Ignore the joined field from API, we'll handle it via DB logic
       };
     });
 
-    // Load existing members
+    // Fetch existing members from DB
     const { data: existingMembers, error: selectError } = await supabase
       .from('clan_members')
-      .select('*');
+      .select('name, rank, joined, rank_changed');
 
     if (selectError) {
       console.error('Supabase select error:', selectError);
@@ -62,32 +61,29 @@ export default async function handler(req, res) {
       const existing = existingMap[member.name];
 
       if (!existing) {
-        // New member joined, set joined = NOW
-        changes.newMembers.push(member);
+        // New member: insert into DB with current timestamp
+        const newMember = {
+          name: member.name,
+          rank: member.rank,
+          joined: now,
+          rank_changed: false,
+        };
+
         const { error: insertError } = await supabase
           .from('clan_members')
-          .insert([{
-            name: member.name,
-            rank: member.rank,
-            joined: now,
-            rank_changed: false,
-          }]);
+          .insert([newMember]);
+
         if (insertError) {
           console.error('Insert error for member', member.name, insertError);
           return res.status(500).json({ error: 'Database insert error' });
         }
+
+        changes.newMembers.push(newMember);
       } else {
-        // Check rank change only
+        // Existing member: check for rank change
         const rankChanged = existing.rank !== member.rank;
 
         if (rankChanged) {
-          changes.rankChanges.push({
-            name: member.name,
-            oldRank: existing.rank,
-            newRank: member.rank,
-            joined: existing.joined, // keep existing joined timestamp
-          });
-
           const { error: updateError } = await supabase
             .from('clan_members')
             .update({
@@ -100,14 +96,19 @@ export default async function handler(req, res) {
             console.error('Update error for member', member.name, updateError);
             return res.status(500).json({ error: 'Database update error' });
           }
-        } else {
-          // No change - keep rank_changed false
-          if (existing.rank_changed) {
-            await supabase
-              .from('clan_members')
-              .update({ rank_changed: false })
-              .eq('name', member.name);
-          }
+
+          changes.rankChanges.push({
+            name: member.name,
+            oldRank: existing.rank,
+            newRank: member.rank,
+            joined: existing.joined,
+          });
+        } else if (existing.rank_changed) {
+          // Reset rank_changed if no longer changed
+          await supabase
+            .from('clan_members')
+            .update({ rank_changed: false })
+            .eq('name', member.name);
         }
       }
     }
