@@ -1,7 +1,7 @@
 import { createClient } from '@supabase/supabase-js';
 
 const SUPABASE_URL = process.env.SUPABASE_URL;
-const SUPABASE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY; // Service Role Key for full access
+const SUPABASE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY;
 
 const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
 
@@ -17,7 +17,6 @@ export default async function handler(req, res) {
     }
 
     const csvText = await clanResponse.text();
-
     const lines = csvText.trim().split('\n').filter(line => line.trim() !== '');
 
     if (lines.length < 2) {
@@ -33,7 +32,7 @@ export default async function handler(req, res) {
       return {
         name: cols[0].trim(),
         rank: cols[1].trim(),
-        joined: parseInt(cols[2].trim(), 10),
+        // Ignore the joined field from API, we'll handle it via DB logic
       };
     });
 
@@ -57,18 +56,20 @@ export default async function handler(req, res) {
       rankChanges: [],
     };
 
+    const now = new Date().toISOString();
+
     for (const member of members) {
       const existing = existingMap[member.name];
 
       if (!existing) {
-        // New member joined
+        // New member joined, set joined = NOW
         changes.newMembers.push(member);
         const { error: insertError } = await supabase
           .from('clan_members')
           .insert([{
             name: member.name,
             rank: member.rank,
-            joined: member.joined,
+            joined: now,
             rank_changed: false,
           }]);
         if (insertError) {
@@ -76,24 +77,22 @@ export default async function handler(req, res) {
           return res.status(500).json({ error: 'Database insert error' });
         }
       } else {
-        // Check rank change or joined change
+        // Check rank change only
         const rankChanged = existing.rank !== member.rank;
 
-        if (rankChanged || existing.joined !== member.joined) {
+        if (rankChanged) {
           changes.rankChanges.push({
             name: member.name,
             oldRank: existing.rank,
             newRank: member.rank,
-            oldJoined: existing.joined,
-            newJoined: member.joined,
+            joined: existing.joined, // keep existing joined timestamp
           });
 
           const { error: updateError } = await supabase
             .from('clan_members')
             .update({
               rank: member.rank,
-              joined: member.joined,
-              rank_changed: rankChanged,
+              rank_changed: true,
             })
             .eq('name', member.name);
 
@@ -103,7 +102,6 @@ export default async function handler(req, res) {
           }
         } else {
           // No change - keep rank_changed false
-          // Optional: reset rank_changed if you want to clear previous flags
           if (existing.rank_changed) {
             await supabase
               .from('clan_members')
