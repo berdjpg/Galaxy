@@ -10,21 +10,21 @@ function formatDate(timestamp) {
 const upTriangle = '▲';
 const downTriangle = '▼';
 
-// Define your rank order here for comparison
+// Rank order with lowercase keys for safe lookup
 const rankOrder = {
-  'Recruit': 1,
-  'Corporal': 2,
-  'Sergeant': 3,
-  'Lieutenant': 4,
-  'Captain': 5,
-  'General': 6,
-  'Admin': 7,
-  'Organiser': 8,
-  'Coordinator': 9,
-  'Overseer': 10,
-  'Deputy Owner': 11,
-  'Owner': 12,
-  // Add all ranks you have here with increasing order
+  recruit: 1,
+  corporal: 2,
+  sergeant: 3,
+  lieutenant: 4,
+  captain: 5,
+  general: 6,
+  admin: 7,
+  organiser: 8,
+  coordinator: 9,
+  overseer: 10,
+  'deputy owner': 11,
+  owner: 12,
+  // Add all ranks you have here, lowercase and exact spelling
 };
 
 export default function Home() {
@@ -221,19 +221,25 @@ export default function Home() {
           {filteredSortedMembers.map(({ name, rank, previous_rank, joined, rank_changed }) => {
             const membershipDuration = getMembershipDuration(joined);
 
-            // Determine arrow & color for rank change with rankOrder map
+            // Normalize rank strings for comparison
+            const prevRankKey = previous_rank?.trim().toLowerCase() || '';
+            const currRankKey = rank?.trim().toLowerCase() || '';
+            const prevRankValue = rankOrder[prevRankKey] || 0;
+            const currRankValue = rankOrder[currRankKey] || 0;
+            const promoted = currRankValue > prevRankValue;
+            const demoted = currRankValue < prevRankValue;
+
             let rankChangeIndicator = null;
-
             if (rank_changed) {
-              const prevRankValue = rankOrder[previous_rank] || 0;
-              const currRankValue = rankOrder[rank] || 0;
-              const promoted = currRankValue > prevRankValue;
-
-              rankChangeIndicator = promoted ? (
-                <span style={{ color: 'green', fontWeight: 'bold', marginLeft: 4 }}>{upTriangle}</span>
-              ) : (
-                <span style={{ color: 'red', fontWeight: 'bold', marginLeft: 4 }}>{downTriangle}</span>
-              );
+              if (promoted) {
+                rankChangeIndicator = (
+                  <span style={{ color: 'green', fontWeight: 'bold', marginLeft: 4 }}>{upTriangle}</span>
+                );
+              } else if (demoted) {
+                rankChangeIndicator = (
+                  <span style={{ color: 'red', fontWeight: 'bold', marginLeft: 4 }}>{downTriangle}</span>
+                );
+              }
             }
 
             return (
