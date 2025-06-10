@@ -3,7 +3,18 @@ import { useEffect, useState, useMemo } from 'react';
 function formatDate(timestamp) {
   if (!timestamp) return 'Unknown';
   const date = new Date(timestamp);
-  return isNaN(date) ? 'Invalid Date' : date.toLocaleDateString() + ' ' + date.toLocaleTimeString();
+  if (isNaN(date)) return 'Invalid Date';
+
+  // European format: DD/MM/YYYY HH:mm:ss (24-hour)
+  const day = String(date.getDate()).padStart(2, '0');
+  const month = String(date.getMonth() + 1).padStart(2, '0'); // Months 0-11
+  const year = date.getFullYear();
+
+  const hours = String(date.getHours()).padStart(2, '0');
+  const minutes = String(date.getMinutes()).padStart(2, '0');
+  const seconds = String(date.getSeconds()).padStart(2, '0');
+
+  return `${day}/${month}/${year} ${hours}:${minutes}:${seconds}`;
 }
 
 const promotionTimes = {
@@ -365,30 +376,6 @@ export default function Home() {
             onChange={(e) => setFilterText(e.target.value)}
             aria-label="Filter clan members by name"
           />
-          {/* <button
-            onClick={() => handleSort('importance')}
-            className={sortKey === 'importance' ? 'active' : ''}
-            aria-pressed={sortKey === 'importance'}
-            title="Sort by importance"
-          >
-            Rank {sortKey === 'importance' ? (sortAsc ? '▲' : '▼') : ''}
-          </button>
-          <button
-            onClick={() => handleSort('name')}
-            className={sortKey === 'name' ? 'active' : ''}
-            aria-pressed={sortKey === 'name'}
-            title="Sort by name"
-          >
-            Name {sortKey === 'name' ? (sortAsc ? '▲' : '▼') : ''}
-          </button>
-          <button
-            onClick={() => handleSort('joined')}
-            className={sortKey === 'joined' ? 'active' : ''}
-            aria-pressed={sortKey === 'joined'}
-            title="Sort by join date"
-          >
-            Joined {sortKey === 'joined' ? (sortAsc ? '▲' : '▼') : ''}
-          </button> */}
         </div>
 
         <table role="table" aria-label="Clan members table">
