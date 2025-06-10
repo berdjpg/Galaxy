@@ -19,27 +19,36 @@ export default async function handler(req, res) {
 
     const csvText = await clanResponse.text();
 
-    // Example CSV output starts like:
-    // Clanmate,Rank,Joined
-    // player1,General,1623456789
-    // player2,Recruit,1621234567
+    // Debug: log start of CSV data and total length to verify full response
+    console.log('CSV data length:', csvText.length);
+    console.log('CSV snippet:', csvText.slice(0, 500));
 
-    // Parse CSV into array of members:
-    const lines = csvText.trim().split('\n');
+    // Parse CSV into array of members
+    // Trim, split by line and filter out empty lines
+    const lines = csvText.trim().split('\n').filter(line => line.trim() !== '');
+
+    if (lines.length < 2) {
+      console.error('No member data found in CSV');
+      return res.status(500).json({ error: 'No member data found' });
+    }
+
+    // Remove header line
     const header = lines.shift().split(',');
 
     const members = lines.map(line => {
       const cols = line.split(',');
+
       return {
-        name: cols[0],
-        rank: cols[1],
-        joined: parseInt(cols[2], 10),
+        name: cols[0].trim(),
+        rank: cols[1].trim(),
+        joined: parseInt(cols[2].trim(), 10),
       };
     });
 
+    console.log('Parsed members count:', members.length);
 
     if (!members || !Array.isArray(members)) {
-      console.error('Invalid clan data format:', clanData);
+      console.error('Invalid clan data format');
       return res.status(500).json({ error: 'Invalid clan data format' });
     }
 
@@ -112,6 +121,6 @@ export default async function handler(req, res) {
     return res.status(200).json({ changes, totalMembers: members.length });
   } catch (err) {
     console.error('Unexpected error:', err);
-    return res.status(500).json({ error: 'Internal server error' });
+    return res.status(500).json({ error: 'Internal server error', details: err.message || err.toString() });
   }
 }
