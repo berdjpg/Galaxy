@@ -14,6 +14,8 @@ export default async function handler(req, res) {
   if (req.headers.authorization !== `Bearer ${CRON_SECRET}`) {
     return res.status(401).json({ error: 'Unauthorized' });
   }
+  console.log('Cron job triggered at', new Date().toISOString());
+
 
   try {
     const clanResponse = await fetch(CLAN_API_URL);
