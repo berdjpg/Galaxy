@@ -241,7 +241,7 @@ export default function Home() {
                 );
               } else {
                 rankChangeIndicator = (
-                  <span style={{ color: 'blue', fontWeight: 'bold', marginLeft: 4 }}>{downTriangle}</span>
+                  <span style={{ color: 'blue', fontWeight: 'bold', marginLeft: 4 }}>▲</span>
                 );
               }
             }
@@ -258,6 +258,7 @@ export default function Home() {
                 <td style={{ padding: '8px 12px', whiteSpace: 'nowrap' }}>
                   {rank}
                   {rankChangeIndicator}
+                  {downTriangle}
                 </td>
                 <td style={{ padding: '8px 12px', whiteSpace: 'nowrap' }}>{previous_rank || '-'}</td>
                 <td style={{ padding: '8px 12px' }}>{formatDate(joined)}</td>
