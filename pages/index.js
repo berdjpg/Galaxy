@@ -9,7 +9,7 @@ function formatDate(timestamp) {
 
 // Promotion time requirements in days per rank to get promoted
 const promotionTimes = {
-  recruit:  7,         // days to promote from recruit
+  recruit:  7,
   corporal: 0,
   sergeant: 0,
   lieutenant: 91,
@@ -26,15 +26,12 @@ const promotionTimes = {
 // Get days member has been in current rank, using rank history or join date fallback
 function getDaysInCurrentRank(memberName, rankHistories, currentRank, joinedAt) {
   if (!rankHistories || !rankHistories[memberName] || rankHistories[memberName].length === 0) {
-    // No history, fallback to joined date
     const joinDate = new Date(joinedAt);
     const now = new Date();
     if (isNaN(joinDate)) return null;
     return Math.floor((now - joinDate) / (1000 * 60 * 60 * 24));
   }
-
   const history = rankHistories[memberName];
-  // History sorted descending by changed_at, find last time member got this rank
   for (let entry of history) {
     if ((entry.new_rank || '').toLowerCase() === currentRank.toLowerCase()) {
       const changedAt = new Date(entry.changed_at);
@@ -43,8 +40,6 @@ function getDaysInCurrentRank(memberName, rankHistories, currentRank, joinedAt) 
       return Math.floor((now - changedAt) / (1000 * 60 * 60 * 24));
     }
   }
-
-  // If no promotion to current rank found, fallback to joined date
   const joinDate = new Date(joinedAt);
   const now = new Date();
   if (isNaN(joinDate)) return null;
@@ -65,17 +60,14 @@ export default function Home() {
   const [sortAsc, setSortAsc] = useState(true);
   const [filterText, setFilterText] = useState('');
 
-  // Hover popup states
   const [hoveredMember, setHoveredMember] = useState(null);
   const [historyData, setHistoryData] = useState([]);
   const [historyLoading, setHistoryLoading] = useState(false);
   const hoveredRowRef = useRef(null);
   const [popupStyle, setPopupStyle] = useState({ top: 0, left: 0, opacity: 0 });
 
-  // Store all members' rank histories grouped by member name
   const [rankHistories, setRankHistories] = useState({});
 
-  // Fetch members and their histories on mount
   useEffect(() => {
     async function fetchMembersAndHistories() {
       try {
@@ -83,7 +75,6 @@ export default function Home() {
         const data = await res.json();
         setMembers(data);
 
-        // Fetch histories for all members in parallel
         const histories = {};
         await Promise.all(
           data.map(async (m) => {
@@ -107,14 +98,12 @@ export default function Home() {
     fetchMembersAndHistories();
   }, []);
 
-  // Fetch rank history for hovered member for the popup
   useEffect(() => {
     if (!hoveredMember) {
       setHistoryData([]);
       setPopupStyle(style => ({ ...style, opacity: 0 }));
       return;
     }
-
     async function fetchHistory() {
       setHistoryLoading(true);
       try {
@@ -128,10 +117,8 @@ export default function Home() {
       }
       setHistoryLoading(false);
     }
-
     fetchHistory();
 
-    // Position popup near hovered row
     if (hoveredRowRef.current) {
       const rowRect = hoveredRowRef.current.getBoundingClientRect();
       const popupWidth = 320;
@@ -157,7 +144,6 @@ export default function Home() {
     }
   }, [hoveredMember]);
 
-  // Filter, sort members
   const filteredSortedMembers = useMemo(() => {
     let filtered = [...members];
 
@@ -194,7 +180,6 @@ export default function Home() {
     return filtered;
   }, [members, filterText, sortKey, sortAsc]);
 
-  // Format membership duration for display
   const getMembershipDuration = (joined) => {
     const joinDate = new Date(joined);
     if (isNaN(joinDate)) return 'Unknown';
@@ -207,7 +192,6 @@ export default function Home() {
       : `${days} day${days !== 1 ? 's' : ''}`;
   };
 
-  // Members ready for promotion
   const readyForPromotion = useMemo(() => {
     return members.filter(m => {
       const days = getDaysInCurrentRank(m.name, rankHistories, m.rank, m.joined);
@@ -224,8 +208,8 @@ export default function Home() {
     }
   };
 
-  if (loading) return <p>Loading clan members...</p>;
-  if (!members.length) return <p>No clan members found.</p>;
+  if (loading) return <p style={{ color: '#ddd', textAlign: 'center', marginTop: 40 }}>Loading clan members...</p>;
+  if (!members.length) return <p style={{ color: '#ddd', textAlign: 'center', marginTop: 40 }}>No clan members found.</p>;
 
   return (
     <div
@@ -234,132 +218,216 @@ export default function Home() {
         margin: '40px auto',
         padding: 20,
         fontFamily: "'Segoe UI', Tahoma, Geneva, Verdana, sans-serif",
-        color: '#222',
+        color: '#ddd',
+        backgroundColor: '#121212',
+        borderRadius: 12,
+        boxShadow: '0 0 40px #0b0b0b',
         position: 'relative',
+        userSelect: 'none',
+        minHeight: '100vh',
       }}
       onMouseLeave={() => setHoveredMember(null)}
     >
-      <h1 style={{ marginBottom: 24 }}>Clan Members - Remenant</h1>
+      <h1 style={{
+        marginBottom: 24,
+        color: '#9cd0ff',
+        textShadow: '0 0 6px #2a65ff',
+        userSelect: 'text',
+      }}>Clan Members - Remenant</h1>
 
-      {/* To-Do Card for leadership */}
+      {/* Promotion cards row */}
       {readyForPromotion.length > 0 && (
-        <div style={{
-          marginBottom: 24,
-          padding: 12,
-          border: '2px solid green',
-          borderRadius: 6,
-          backgroundColor: '#e6ffe6',
-          fontSize: 16,
-          fontWeight: 'bold',
-          color: 'green',
-        }}>
-          Members Ready for Promotion:
-          <ul style={{ marginTop: 8, paddingLeft: 20, fontWeight: 'normal' }}>
-            {readyForPromotion.map(m => (
-              <li key={m.name}>
-                {m.name} — {m.rank} ({getDaysInCurrentRank(m.name, rankHistories, m.rank, m.joined)} days)
-              </li>
-            ))}
-          </ul>
+        <div
+          style={{
+            marginBottom: 24,
+            display: 'flex',
+            gap: 16,
+            overflowX: 'auto',
+            paddingBottom: 4,
+            // hide scrollbar visually but allow scrolling
+            scrollbarWidth: 'thin',
+            scrollbarColor: '#4a90e2 transparent',
+          }}
+          className="promo-cards-container"
+        >
+          {readyForPromotion.map(m => {
+            const days = getDaysInCurrentRank(m.name, rankHistories, m.rank, m.joined);
+            return (
+              <div
+                key={m.name}
+                title={`${m.name} — ${m.rank} (${days} days in rank)`}
+                style={{
+                  minWidth: 140,
+                  minHeight: 140,
+                  backgroundColor: '#1a1a2e',
+                  borderRadius: 12,
+                  padding: 16,
+                  boxShadow: '0 0 8px #2a65ff',
+                  flexShrink: 0,
+                  display: 'flex',
+                  flexDirection: 'column',
+                  justifyContent: 'center',
+                  alignItems: 'center',
+                  color: '#a8caff',
+                  cursor: 'default',
+                  transition: 'transform 0.2s ease, box-shadow 0.2s ease',
+                  userSelect: 'none',
+                }}
+                onMouseEnter={e => {
+                  e.currentTarget.style.transform = 'scale(1.05)';
+                  e.currentTarget.style.boxShadow = '0 0 15px #4791ff';
+                }}
+                onMouseLeave={e => {
+                  e.currentTarget.style.transform = 'scale(1)';
+                  e.currentTarget.style.boxShadow = '0 0 8px #2a65ff';
+                }}
+              >
+                <div style={{ fontWeight: '700', fontSize: 20, marginBottom: 8, textShadow: '0 0 8px #3f7fff' }}>{m.name}</div>
+                <div style={{ fontSize: 16, fontStyle: 'italic', color: '#8ab4f8' }}>{m.rank}</div>
+                <div style={{ fontSize: 14, marginTop: 12, color: '#aac8ff' }}>
+                  {days} day{days !== 1 ? 's' : ''} in rank
+                </div>
+                <div
+                  style={{
+                    marginTop: 10,
+                    fontSize: 13,
+                    color: '#6fb6ff',
+                    fontWeight: '600',
+                    backgroundColor: '#224488',
+                    padding: '4px 8px',
+                    borderRadius: 6,
+                    textShadow: '0 0 6px #1155bb',
+                    userSelect: 'none',
+                  }}
+                >
+                  Ready for Promotion
+                </div>
+              </div>
+            );
+          })}
         </div>
       )}
 
-      {/* Filters */}
-      <div style={{ marginBottom: 16, display: 'flex', gap: '12px', flexWrap: 'wrap' }}>
+      {/* Search and sorting controls */}
+      <div
+        style={{
+          marginBottom: 16,
+          display: 'flex',
+          gap: 12,
+          alignItems: 'center',
+          flexWrap: 'wrap',
+          color: '#9ec1ff',
+        }}
+      >
+        <label htmlFor="filter" style={{ userSelect: 'none' }}>Filter by name:</label>
         <input
+          id="filter"
           type="text"
-          placeholder="Filter by name..."
+          placeholder="Search members..."
           value={filterText}
           onChange={e => setFilterText(e.target.value)}
-          style={{ padding: '6px 10px', fontSize: 16, flexGrow: 1, minWidth: 180 }}
+          style={{
+            padding: '6px 10px',
+            borderRadius: 6,
+            border: 'none',
+            outline: 'none',
+            fontSize: 14,
+            backgroundColor: '#22263b',
+            color: '#cbd6ff',
+            flexGrow: 1,
+            maxWidth: 220,
+            userSelect: 'text',
+          }}
         />
+        <button
+          onClick={() => handleSort('name')}
+          style={{
+            cursor: 'pointer',
+            backgroundColor: sortKey === 'name' ? '#4a90e2' : '#22263b',
+            color: sortKey === 'name' ? '#e0eaff' : '#a0a9bf',
+            border: 'none',
+            borderRadius: 6,
+            padding: '6px 12px',
+            fontWeight: sortKey === 'name' ? '700' : '500',
+            userSelect: 'none',
+            userDrag: 'none',
+          }}
+          title="Sort by name"
+        >
+          Name {sortKey === 'name' ? (sortAsc ? '▲' : '▼') : ''}
+        </button>
+        <button
+          onClick={() => handleSort('joined')}
+          style={{
+            cursor: 'pointer',
+            backgroundColor: sortKey === 'joined' ? '#4a90e2' : '#22263b',
+            color: sortKey === 'joined' ? '#e0eaff' : '#a0a9bf',
+            border: 'none',
+            borderRadius: 6,
+            padding: '6px 12px',
+            fontWeight: sortKey === 'joined' ? '700' : '500',
+            userSelect: 'none',
+            userDrag: 'none',
+          }}
+          title="Sort by join date"
+        >
+          Joined {sortKey === 'joined' ? (sortAsc ? '▲' : '▼') : ''}
+        </button>
       </div>
 
-      {/* Table */}
+      {/* Members table */}
       <table
         style={{
           width: '100%',
           borderCollapse: 'collapse',
-          boxShadow: '0 0 10px rgba(0,0,0,0.05)',
+          fontSize: 14,
+          userSelect: 'none',
+          boxShadow: '0 0 10px #1a1a2e',
+          borderRadius: 8,
+          overflow: 'hidden',
+          color: '#cbd6ff',
+          backgroundColor: '#1a1a2e',
         }}
       >
         <thead>
-          <tr
-            style={{
-              borderBottom: '3px solid #444',
-              backgroundColor: '#f9f9f9',
-              color: '#333',
-              textAlign: 'left',
-            }}
-          >
-            {['name', 'rank', 'joined', 'membershipDuration', 'promotionStatus'].map(key => {
-              const labels = {
-                name: 'Name',
-                rank: 'Rank',
-                joined: 'Joined',
-                membershipDuration: 'Time in clan',
-                promotionStatus: 'Status',
-              };
-              return (
-                <th
-                  key={key}
-                  onClick={() => handleSort(key)}
-                  style={{
-                    padding: '10px 12px',
-                    whiteSpace: 'nowrap',
-                    userSelect: 'none',
-                    cursor: key === 'promotionStatus' ? 'default' : 'pointer',
-                    color: key === 'promotionStatus' ? '#666' : undefined,
-                  }}
-                  title={key === 'promotionStatus' ? undefined : `Sort by ${labels[key]}`}
-                >
-                  {labels[key]} {sortKey === key ? (sortAsc ? '▲' : '▼') : ''}
-                </th>
-              );
-            })}
+          <tr style={{ borderBottom: '2px solid #4791ff', userSelect: 'none' }}>
+            <th style={{ padding: '10px 12px', textAlign: 'left', cursor: 'pointer', userSelect: 'none' }} onClick={() => handleSort('name')}>
+              Name {sortKey === 'name' ? (sortAsc ? '▲' : '▼') : ''}
+            </th>
+            <th style={{ padding: '10px 12px', textAlign: 'center' }}>Rank</th>
+            <th style={{ padding: '10px 12px', textAlign: 'center', cursor: 'pointer', userSelect: 'none' }} onClick={() => handleSort('joined')}>
+              Joined {sortKey === 'joined' ? (sortAsc ? '▲' : '▼') : ''}
+            </th>
+            <th style={{ padding: '10px 12px', textAlign: 'center' }}>Days in Current Rank</th>
           </tr>
         </thead>
         <tbody>
-          {filteredSortedMembers.map(({ name, rank, joined }) => {
-            const daysInRank = getDaysInCurrentRank(name, rankHistories, rank, joined);
-            const promotionReady = daysInRank !== null && isEligibleForPromotion(rank, daysInRank);
+          {filteredSortedMembers.map(m => {
+            const days = getDaysInCurrentRank(m.name, rankHistories, m.rank, m.joined);
             return (
               <tr
-                key={name}
+                key={m.name}
+                ref={hoveredMember === m.name ? hoveredRowRef : null}
+                onMouseEnter={() => setHoveredMember(m.name)}
+                onMouseLeave={() => setHoveredMember(null)}
                 style={{
-                  borderBottom: '1px solid #eee',
-                  backgroundColor: promotionReady ? '#f0fff0' : undefined,
-                }}
-                onMouseEnter={(e) => {
-                  setHoveredMember(name);
-                  hoveredRowRef.current = e.currentTarget;
-                }}
-                onMouseLeave={() => {
-                  setHoveredMember(null);
-                  hoveredRowRef.current = null;
+                  cursor: 'default',
+                  backgroundColor: hoveredMember === m.name ? '#2a3c66' : 'transparent',
+                  transition: 'background-color 0.3s',
+                  userSelect: 'none',
                 }}
               >
-                <td style={{ padding: '10px 12px', fontWeight: '600' }}>{name}</td>
-                <td style={{ padding: '10px 12px', fontFamily: 'monospace' }}>{rank}</td>
-                <td style={{ padding: '10px 12px', whiteSpace: 'nowrap' }}>{formatDate(joined)}</td>
-                <td style={{ padding: '10px 12px', whiteSpace: 'nowrap' }}>{getMembershipDuration(joined)}</td>
-                <td
-                  style={{
-                    padding: '10px 12px',
-                    fontWeight: 'bold',
-                    color: promotionReady ? 'green' : '#888',
-                    whiteSpace: 'nowrap',
-                  }}
-                >
-                  {promotionReady ? 'Eligible' : '-'}
-                </td>
+                <td style={{ padding: '8px 12px' }}>{m.name}</td>
+                <td style={{ padding: '8px 12px', textAlign: 'center', fontWeight: '600', color: '#a0c1ff' }}>{m.rank}</td>
+                <td style={{ padding: '8px 12px', textAlign: 'center' }}>{formatDate(m.joined)}</td>
+                <td style={{ padding: '8px 12px', textAlign: 'center' }}>{days !== null ? days : 'N/A'}</td>
               </tr>
             );
           })}
         </tbody>
       </table>
 
-      {/* Hover popup for rank history */}
+      {/* Popup with rank history */}
       {hoveredMember && (
         <div
           style={{
@@ -368,40 +436,52 @@ export default function Home() {
             left: popupStyle.left,
             width: 320,
             maxHeight: 300,
-            overflowY: 'auto',
-            backgroundColor: 'white',
-            border: '1px solid #aaa',
-            borderRadius: 8,
-            padding: 12,
+            backgroundColor: '#1c1c3a',
+            borderRadius: 10,
+            padding: 14,
+            color: '#a9c2ff',
+            boxShadow: '0 0 20px #4770ff',
             fontSize: 13,
-            color: '#222',
-            boxShadow: '0 4px 10px rgba(0,0,0,0.15)',
             opacity: popupStyle.opacity,
-            transition: 'opacity 0.15s ease-in-out',
-            zIndex: 1000,
-            pointerEvents: popupStyle.opacity === 0 ? 'none' : 'auto',
-            userSelect: 'none',
+            transition: 'opacity 0.3s ease',
+            overflowY: 'auto',
+            zIndex: 10,
+            userSelect: 'text',
           }}
           onMouseEnter={() => setHoveredMember(hoveredMember)}
           onMouseLeave={() => setHoveredMember(null)}
         >
-          <h4 style={{ margin: '0 0 8px 0' }}>Rank History - {hoveredMember}</h4>
-          {historyLoading && <p>Loading history...</p>}
-          {!historyLoading && historyData.length === 0 && <p>No rank history available.</p>}
-          {!historyLoading && historyData.length > 0 && (
-            <ul style={{ listStyle: 'none', margin: 0, padding: 0 }}>
-              {historyData.map((entry, idx) => (
+          <div
+            style={{
+              fontWeight: '700',
+              marginBottom: 8,
+              fontSize: 16,
+              color: '#c7d1ff',
+              textShadow: '0 0 6px #5a78ff',
+            }}
+          >
+            {hoveredMember} - Rank History
+          </div>
+          {historyLoading ? (
+            <div>Loading history...</div>
+          ) : historyData.length === 0 ? (
+            <div>No rank history available.</div>
+          ) : (
+            <ul style={{ listStyleType: 'none', paddingLeft: 0, margin: 0 }}>
+              {historyData.map((entry, i) => (
                 <li
-                  key={idx}
+                  key={i}
                   style={{
-                    borderBottom: '1px solid #eee',
-                    padding: '4px 0',
-                    fontFamily: 'monospace',
-                    fontSize: 12,
+                    marginBottom: 6,
+                    paddingBottom: 6,
+                    borderBottom: '1px solid #3a3f66',
                   }}
                 >
-                  <strong>{entry.old_rank || 'N/A'}</strong> → <strong>{entry.new_rank || 'N/A'}</strong><br />
-                  <small>{formatDate(entry.changed_at)}</small>
+                  <div style={{ fontWeight: '600', color: '#8bb0ff' }}>{entry.new_rank}</div>
+                  <div style={{ fontSize: 12, color: '#b0bbdd' }}>
+                    {formatDate(entry.changed_at)}
+                  </div>
+                  {entry.note && <div style={{ fontSize: 11, fontStyle: 'italic', marginTop: 2, color: '#95a0cc' }}>Note: {entry.note}</div>}
                 </li>
               ))}
             </ul>
