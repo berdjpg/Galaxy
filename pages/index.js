@@ -365,13 +365,13 @@ export default function Home() {
             onChange={(e) => setFilterText(e.target.value)}
             aria-label="Filter clan members by name"
           />
-          <button
+          {/* <button
             onClick={() => handleSort('importance')}
             className={sortKey === 'importance' ? 'active' : ''}
             aria-pressed={sortKey === 'importance'}
             title="Sort by importance"
           >
-            Importance {sortKey === 'importance' ? (sortAsc ? '▲' : '▼') : ''}
+            Rank {sortKey === 'importance' ? (sortAsc ? '▲' : '▼') : ''}
           </button>
           <button
             onClick={() => handleSort('name')}
@@ -388,7 +388,7 @@ export default function Home() {
             title="Sort by join date"
           >
             Joined {sortKey === 'joined' ? (sortAsc ? '▲' : '▼') : ''}
-          </button>
+          </button> */}
         </div>
 
         <table role="table" aria-label="Clan members table">
@@ -405,7 +405,17 @@ export default function Home() {
               >
                 Name {sortKey === 'name' ? (sortAsc ? '▲' : '▼') : ''}
               </th>
-              <th scope="col">Rank</th>
+              <th
+                scope="col"
+                onClick={() => handleSort('joined')}
+                tabIndex={0}
+                role="button"
+                aria-sort={
+                  sortKey === 'importance' ? (sortAsc ? 'ascending' : 'descending') : 'none'
+                }
+              >
+                Rank {sortKey === 'importance' ? (sortAsc ? '▲' : '▼') : ''}
+              </th>
               <th
                 scope="col"
                 onClick={() => handleSort('joined')}
