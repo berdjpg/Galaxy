@@ -407,7 +407,7 @@ export default function Home() {
               </th>
               <th
                 scope="col"
-                onClick={() => handleSort('joined')}
+                onClick={() => handleSort('importance')}
                 tabIndex={0}
                 role="button"
                 aria-sort={
