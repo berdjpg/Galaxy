@@ -33,9 +33,7 @@ export default function Home() {
 
   const [sortKey, setSortKey] = useState('name');
   const [sortAsc, setSortAsc] = useState(true);
-
   const [filterText, setFilterText] = useState('');
-  const [filterRankChanged, setFilterRankChanged] = useState('all');
 
   useEffect(() => {
     async function fetchData() {
@@ -47,7 +45,6 @@ export default function Home() {
     fetchData();
   }, []);
 
-  // Sort and filter logic
   const filteredSortedMembers = useMemo(() => {
     let filtered = [...members];
 
@@ -55,12 +52,6 @@ export default function Home() {
       filtered = filtered.filter(m =>
         m.name.toLowerCase().includes(filterText.toLowerCase())
       );
-    }
-
-    if (filterRankChanged === 'yes') {
-      filtered = filtered.filter(m => m.rank_changed);
-    } else if (filterRankChanged === 'no') {
-      filtered = filtered.filter(m => !m.rank_changed);
     }
 
     filtered.sort((a, b) => {
@@ -88,7 +79,7 @@ export default function Home() {
     });
 
     return filtered;
-  }, [members, filterText, filterRankChanged, sortKey, sortAsc]);
+  }, [members, filterText, sortKey, sortAsc]);
 
   const getMembershipDuration = (joined) => {
     const joinDate = new Date(joined);
@@ -133,15 +124,6 @@ export default function Home() {
           onChange={e => setFilterText(e.target.value)}
           style={{ padding: '6px 10px', fontSize: 16, flexGrow: 1, minWidth: 180 }}
         />
-        <select
-          value={filterRankChanged}
-          onChange={e => setFilterRankChanged(e.target.value)}
-          style={{ padding: '6px 10px', fontSize: 16 }}
-        >
-          <option value="all">All Members</option>
-          <option value="yes">Rank Changed: Yes</option>
-          <option value="no">Rank Changed: No</option>
-        </select>
       </div>
 
       {/* Table */}
@@ -157,14 +139,13 @@ export default function Home() {
             color: '#333',
             textAlign: 'left',
           }}>
-            {['name', 'rank', 'previous_rank', 'joined', 'membershipDuration', 'rank_changed'].map(key => {
+            {['name', 'rank', 'previous_rank', 'joined', 'membershipDuration'].map(key => {
               const labels = {
                 name: 'Name',
                 rank: 'Rank',
                 previous_rank: 'Previous Rank',
                 joined: 'Joined',
                 membershipDuration: 'Membership Duration',
-                rank_changed: 'Rank Changed?',
               };
               return (
                 <th
@@ -185,14 +166,14 @@ export default function Home() {
           </tr>
         </thead>
         <tbody>
-          {filteredSortedMembers.map(({ name, rank, previous_rank, joined, rank_changed }) => {
+          {filteredSortedMembers.map(({ name, rank, previous_rank, joined }) => {
             const duration = getMembershipDuration(joined);
 
             const prevVal = rankOrder[previous_rank?.trim().toLowerCase()] || 0;
             const currVal = rankOrder[rank?.trim().toLowerCase()] || 0;
 
             let rankIndicator = null;
-            if (rank_changed) {
+            if (prevVal && currVal) {
               if (currVal > prevVal) {
                 rankIndicator = <span style={{ color: 'green', fontWeight: 'bold', marginLeft: 4 }}>{upTriangle}</span>;
               } else if (currVal < prevVal) {
@@ -205,7 +186,7 @@ export default function Home() {
             return (
               <tr key={name} style={{
                 borderBottom: '1px solid #eee',
-                backgroundColor: rank_changed ? '#e6ffed' : 'white',
+                backgroundColor: prevVal && currVal && currVal !== prevVal ? '#e6ffed' : 'white',
               }}>
                 <td style={{ padding: '8px 12px' }}>{name}</td>
                 <td style={{ padding: '8px 12px', whiteSpace: 'nowrap' }}>
@@ -216,20 +197,12 @@ export default function Home() {
                 </td>
                 <td style={{ padding: '8px 12px' }}>{formatDate(joined)}</td>
                 <td style={{ padding: '8px 12px' }}>{duration}</td>
-                <td style={{
-                  padding: '8px 12px',
-                  color: rank_changed ? 'green' : 'gray',
-                  fontWeight: rank_changed ? 'bold' : 'normal',
-                  textTransform: 'capitalize',
-                }}>
-                  {rank_changed ? 'Yes' : 'No'}
-                </td>
               </tr>
             );
           })}
           {filteredSortedMembers.length === 0 && (
             <tr>
-              <td colSpan={6} style={{ padding: 20, textAlign: 'center', color: '#666' }}>
+              <td colSpan={5} style={{ padding: 20, textAlign: 'center', color: '#666' }}>
                 No members match the filter criteria.
               </td>
             </tr>
