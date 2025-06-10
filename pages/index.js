@@ -1,16 +1,17 @@
 import { useEffect, useState, useMemo } from 'react';
 
+// Format a date from timestamp or string
 function formatDate(timestamp) {
   if (!timestamp) return 'Unknown';
   const date = new Date(timestamp);
   return isNaN(date) ? 'Invalid Date' : date.toLocaleDateString();
 }
 
-// Unicode triangles for arrows
+// Unicode triangles for rank change indicators
 const upTriangle = '▲';
 const downTriangle = '▼';
 
-// Rank order with lowercase keys for safe lookup
+// Map of ranks with order for comparison
 const rankOrder = {
   'recruit': 1,
   'corporal': 2,
@@ -26,59 +27,51 @@ const rankOrder = {
   'owner': 12,
 };
 
-
 export default function Home() {
   const [members, setMembers] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  // Sorting state
-  const [sortKey, setSortKey] = useState('name'); // default sort by name
+  const [sortKey, setSortKey] = useState('name');
   const [sortAsc, setSortAsc] = useState(true);
 
-  // Filtering state
   const [filterText, setFilterText] = useState('');
-  const [filterRankChanged, setFilterRankChanged] = useState('all'); // 'all', 'yes', 'no'
+  const [filterRankChanged, setFilterRankChanged] = useState('all');
 
   useEffect(() => {
-    async function fetchMembers() {
+    async function fetchData() {
       const res = await fetch('/api/members');
       const data = await res.json();
       setMembers(data);
       setLoading(false);
     }
-    fetchMembers();
+    fetchData();
   }, []);
 
-  // Sort and filter members memoized to avoid unnecessary recalculations
+  // Sort and filter logic
   const filteredSortedMembers = useMemo(() => {
-    let filtered = members;
+    let filtered = [...members];
 
-    // Filter by name (case insensitive)
-    if (filterText.trim() !== '') {
+    if (filterText.trim()) {
       filtered = filtered.filter(m =>
         m.name.toLowerCase().includes(filterText.toLowerCase())
       );
     }
 
-    // Filter by rank_changed flag
     if (filterRankChanged === 'yes') {
       filtered = filtered.filter(m => m.rank_changed);
     } else if (filterRankChanged === 'no') {
       filtered = filtered.filter(m => !m.rank_changed);
     }
 
-    // Sorting
-    const sorted = [...filtered].sort((a, b) => {
+    filtered.sort((a, b) => {
       let valA = a[sortKey];
       let valB = b[sortKey];
 
-      // Special handling for joined (date)
       if (sortKey === 'joined') {
         valA = new Date(valA);
         valB = new Date(valB);
       }
 
-      // For membershipDuration, compute diff days to sort by duration
       if (sortKey === 'membershipDuration') {
         const now = new Date();
         const diffA = !valA ? -Infinity : now - new Date(valA);
@@ -94,47 +87,41 @@ export default function Home() {
       return 0;
     });
 
-    return sorted;
+    return filtered;
   }, [members, filterText, filterRankChanged, sortKey, sortAsc]);
 
-  // Calculate membership duration helper
-  function getMembershipDuration(joined) {
+  const getMembershipDuration = (joined) => {
     const joinDate = new Date(joined);
-    const now = new Date();
-
     if (isNaN(joinDate)) return 'Unknown';
 
-    const diffMs = now - joinDate;
-    const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
+    const now = new Date();
+    const days = Math.floor((now - joinDate) / (1000 * 60 * 60 * 24));
 
-    return diffDays > 365
-      ? `${Math.floor(diffDays / 365)} yr${Math.floor(diffDays / 365) > 1 ? 's' : ''}`
-      : `${diffDays} day${diffDays !== 1 ? 's' : ''}`;
-  }
+    return days > 365
+      ? `${Math.floor(days / 365)} yr${days >= 730 ? 's' : ''}`
+      : `${days} day${days !== 1 ? 's' : ''}`;
+  };
 
-  // Handle column header click for sorting
-  function handleSort(key) {
+  const handleSort = (key) => {
     if (sortKey === key) {
       setSortAsc(!sortAsc);
     } else {
       setSortKey(key);
       setSortAsc(true);
     }
-  }
+  };
 
   if (loading) return <p>Loading clan members...</p>;
   if (!members.length) return <p>No clan members found.</p>;
 
   return (
-    <div
-      style={{
-        maxWidth: 900,
-        margin: '40px auto',
-        padding: 20,
-        fontFamily: "'Segoe UI', Tahoma, Geneva, Verdana, sans-serif",
-        color: '#222',
-      }}
-    >
+    <div style={{
+      maxWidth: 900,
+      margin: '40px auto',
+      padding: 20,
+      fontFamily: "'Segoe UI', Tahoma, Geneva, Verdana, sans-serif",
+      color: '#222',
+    }}>
       <h1 style={{ marginBottom: 24 }}>Clan Members - Remenant</h1>
 
       {/* Filters */}
@@ -146,7 +133,6 @@ export default function Home() {
           onChange={e => setFilterText(e.target.value)}
           style={{ padding: '6px 10px', fontSize: 16, flexGrow: 1, minWidth: 180 }}
         />
-
         <select
           value={filterRankChanged}
           onChange={e => setFilterRankChanged(e.target.value)}
@@ -158,45 +144,28 @@ export default function Home() {
         </select>
       </div>
 
-      <table
-        style={{
-          width: '100%',
-          borderCollapse: 'collapse',
-          boxShadow: '0 0 10px rgba(0,0,0,0.05)',
-          cursor: 'default',
-        }}
-      >
+      {/* Table */}
+      <table style={{
+        width: '100%',
+        borderCollapse: 'collapse',
+        boxShadow: '0 0 10px rgba(0,0,0,0.05)',
+      }}>
         <thead>
-          <tr
-            style={{
-              borderBottom: '3px solid #444',
-              textAlign: 'left',
-              backgroundColor: '#f9f9f9',
-              color: '#333',
-            }}
-          >
+          <tr style={{
+            borderBottom: '3px solid #444',
+            backgroundColor: '#f9f9f9',
+            color: '#333',
+            textAlign: 'left',
+          }}>
             {['name', 'rank', 'previous_rank', 'joined', 'membershipDuration', 'rank_changed'].map(key => {
-              let label = '';
-              switch (key) {
-                case 'name':
-                  label = 'Name';
-                  break;
-                case 'rank':
-                  label = 'Rank';
-                  break;
-                case 'previous_rank':
-                  label = 'Previous Rank';
-                  break;
-                case 'joined':
-                  label = 'Joined';
-                  break;
-                case 'membershipDuration':
-                  label = 'Membership Duration';
-                  break;
-                case 'rank_changed':
-                  label = 'Rank Changed?';
-                  break;
-              }
+              const labels = {
+                name: 'Name',
+                rank: 'Rank',
+                previous_rank: 'Previous Rank',
+                joined: 'Joined',
+                membershipDuration: 'Membership Duration',
+                rank_changed: 'Rank Changed?',
+              };
               return (
                 <th
                   key={key}
@@ -206,12 +175,10 @@ export default function Home() {
                     whiteSpace: 'nowrap',
                     userSelect: 'none',
                     cursor: 'pointer',
-                    userDrag: 'none',
                   }}
-                  title={`Sort by ${label}`}
+                  title={`Sort by ${labels[key]}`}
                 >
-                  {label}
-                  {sortKey === key ? (sortAsc ? ' ▲' : ' ▼') : ''}
+                  {labels[key]} {sortKey === key ? (sortAsc ? upTriangle : downTriangle) : ''}
                 </th>
               );
             })}
@@ -219,68 +186,42 @@ export default function Home() {
         </thead>
         <tbody>
           {filteredSortedMembers.map(({ name, rank, previous_rank, joined, rank_changed }) => {
-            const membershipDuration = getMembershipDuration(joined);
+            const duration = getMembershipDuration(joined);
 
-            // Normalize rank strings for comparison
-            const prevRankKey = previous_rank?.trim().toLowerCase() || '';
-            const currRankKey = rank?.trim().toLowerCase() || '';
-            const prevRankValue = rankOrder[prevRankKey] || 0;
-            const currRankValue = rankOrder[currRankKey] || 0;
-            const promoted = currRankValue > prevRankValue;
-            const demoted = currRankValue < prevRankValue;
+            const prevVal = rankOrder[previous_rank?.trim().toLowerCase()] || 0;
+            const currVal = rankOrder[rank?.trim().toLowerCase()] || 0;
 
-            console.log(`[DEBUG] ${name}:`, {
-  rank_changed,
-  rank,
-  previous_rank,
-  currRankValue,
-  prevRankValue,
-  promoted,
-  demoted,
-});
-
-
-            let rankChangeIndicator = null;
-            if (Boolean(rank_changed)) {
-              if (promoted) {
-                rankChangeIndicator = (
-                  <span style={{ color: 'green', fontWeight: 'bold', marginLeft: 4 }}>{upTriangle}</span>
-                );
-              } else if (demoted) {
-                rankChangeIndicator = (
-                  <span style={{ color: 'red', fontWeight: 'bold', marginLeft: 4 }}>{downTriangle}</span>
-                );
+            let rankIndicator = null;
+            if (rank_changed) {
+              if (currVal > prevVal) {
+                rankIndicator = <span style={{ color: 'green', fontWeight: 'bold', marginLeft: 4 }}>{upTriangle}</span>;
+              } else if (currVal < prevVal) {
+                rankIndicator = <span style={{ color: 'red', fontWeight: 'bold', marginLeft: 4 }}>{downTriangle}</span>;
               } else {
-                rankChangeIndicator = (
-                  <span style={{ color: 'blue', fontWeight: 'bold', marginLeft: 4 }}>▲</span>
-                );
+                rankIndicator = <span style={{ color: 'blue', fontWeight: 'bold', marginLeft: 4 }}>=</span>;
               }
             }
 
             return (
-              <tr
-                key={name}
-                style={{
-                  borderBottom: '1px solid #eee',
-                  backgroundColor: rank_changed ? '#e6ffed' : 'white',
-                }}
-              >
+              <tr key={name} style={{
+                borderBottom: '1px solid #eee',
+                backgroundColor: rank_changed ? '#e6ffed' : 'white',
+              }}>
                 <td style={{ padding: '8px 12px' }}>{name}</td>
                 <td style={{ padding: '8px 12px', whiteSpace: 'nowrap' }}>
-                  {rank}
-                  {rankChangeIndicator}
+                  {rank} {rankIndicator}
                 </td>
-                <td style={{ padding: '8px 12px', whiteSpace: 'nowrap' }}>{previous_rank || '-'}</td>
+                <td style={{ padding: '8px 12px', whiteSpace: 'nowrap' }}>
+                  {previous_rank || '-'}
+                </td>
                 <td style={{ padding: '8px 12px' }}>{formatDate(joined)}</td>
-                <td style={{ padding: '8px 12px' }}>{membershipDuration}</td>
-                <td
-                  style={{
-                    padding: '8px 12px',
-                    color: rank_changed ? 'green' : 'gray',
-                    fontWeight: rank_changed ? 'bold' : 'normal',
-                    textTransform: 'capitalize',
-                  }}
-                >
+                <td style={{ padding: '8px 12px' }}>{duration}</td>
+                <td style={{
+                  padding: '8px 12px',
+                  color: rank_changed ? 'green' : 'gray',
+                  fontWeight: rank_changed ? 'bold' : 'normal',
+                  textTransform: 'capitalize',
+                }}>
                   {rank_changed ? 'Yes' : 'No'}
                 </td>
               </tr>
