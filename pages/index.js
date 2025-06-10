@@ -21,6 +21,21 @@ const promotionTimes = {
   owner: 0,
 };
 
+const rankImportance = {
+  owner: 10,
+  'deputy owner': 9,
+  overseer: 8,
+  coordinator: 7,
+  organiser: 6,
+  admin: 5,
+  general: 4,
+  captain: 3,
+  lieutenant: 2,
+  sergeant: 1,
+  corporal: 0,
+  recruit: -1,
+};
+
 function getDaysInCurrentRank(memberName, currentRank, joinedAt) {
   const joinDate = new Date(joinedAt);
   const now = new Date();
@@ -37,8 +52,9 @@ export default function Home() {
   const [members, setMembers] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  const [sortKey, setSortKey] = useState('name');
-  const [sortAsc, setSortAsc] = useState(true);
+  // Default sorting: by importance DESC
+  const [sortKey, setSortKey] = useState('importance');
+  const [sortAsc, setSortAsc] = useState(false);
   const [filterText, setFilterText] = useState('');
 
   useEffect(() => {
@@ -66,12 +82,17 @@ export default function Home() {
     }
 
     filtered.sort((a, b) => {
-      let valA = a[sortKey];
-      let valB = b[sortKey];
+      let valA, valB;
 
-      if (sortKey === 'joined') {
-        valA = new Date(valA);
-        valB = new Date(valB);
+      if (sortKey === 'importance') {
+        valA = rankImportance[a.rank.toLowerCase()] ?? -999;
+        valB = rankImportance[b.rank.toLowerCase()] ?? -999;
+      } else if (sortKey === 'joined') {
+        valA = new Date(a.joined);
+        valB = new Date(b.joined);
+      } else {
+        valA = a[sortKey];
+        valB = b[sortKey];
       }
 
       if (sortKey === 'membershipDuration') {
@@ -116,7 +137,8 @@ export default function Home() {
       setSortAsc(!sortAsc);
     } else {
       setSortKey(key);
-      setSortAsc(true);
+      // Default sort direction: descending for importance, ascending for others
+      setSortAsc(key === 'importance' ? false : true);
     }
   };
 
@@ -138,177 +160,176 @@ export default function Home() {
     <>
       <style>{`
         * {
-  box-sizing: border-box;
-}
-body, html, #__next {
-  margin: 0;
-  padding: 0;
-  height: 100%;
-  background: #0C0D0D;
-  color: #E0E0E0;
-  font-family: 'Inter', sans-serif;
-}
+          box-sizing: border-box;
+        }
+        body, html, #__next {
+          margin: 0;
+          padding: 0;
+          height: 100%;
+          background: #0C0D0D;
+          color: #E0E0E0;
+          font-family: 'Inter', sans-serif;
+        }
 
-.container {
-  max-width: 900px;
-  margin: 40px auto;
-  padding: 20px;
-  background: #121212;
-  border-radius: 8px;
-  display: flex;
-  flex-direction: column;
-  min-height: 100vh;
-}
+        .container {
+          max-width: 900px;
+          margin: 40px auto;
+          padding: 20px;
+          background: #121212;
+          border-radius: 8px;
+          display: flex;
+          flex-direction: column;
+          min-height: 100vh;
+        }
 
-h1 {
-  font-weight: 600;
-  font-size: 2rem;
-  margin-bottom: 24px;
-  color: #FC6F53;
-}
+        h1 {
+          font-weight: 600;
+          font-size: 2rem;
+          margin-bottom: 24px;
+          color: #FC6F53;
+        }
 
-/* Controls */
-.controls {
-  display: flex;
-  gap: 12px;
-  margin-bottom: 20px;
-  flex-wrap: wrap;
-  align-items: center;
-}
+        /* Controls */
+        .controls {
+          display: flex;
+          gap: 12px;
+          margin-bottom: 20px;
+          flex-wrap: wrap;
+          align-items: center;
+        }
 
-.controls label {
-  font-weight: 500;
-  font-size: 0.9rem;
-}
+        .controls label {
+          font-weight: 500;
+          font-size: 0.9rem;
+        }
 
-.controls input[type="text"] {
-  flex-grow: 1;
-  max-width: 220px;
-  padding: 8px 12px;
-  font-size: 1rem;
-  border-radius: 6px;
-  border: 1px solid #2A2A2A;
-  background: #1A1A1A;
-  color: #FFF;
-}
+        .controls input[type="text"] {
+          flex-grow: 1;
+          max-width: 220px;
+          padding: 8px 12px;
+          font-size: 1rem;
+          border-radius: 6px;
+          border: 1px solid #2A2A2A;
+          background: #1A1A1A;
+          color: #FFF;
+        }
 
-.controls input[type="text"]:focus {
-  outline: 1px solid #FC6F53;
-  background: #1E1E1E;
-}
+        .controls input[type="text"]:focus {
+          outline: 1px solid #FC6F53;
+          background: #1E1E1E;
+        }
 
-.controls button {
-  padding: 8px 14px;
-  border-radius: 6px;
-  border: none;
-  font-weight: 500;
-  font-size: 0.9rem;
-  cursor: pointer;
-  background: #1A1A1A;
-  color: #CCCCCC;
-}
-.controls button:hover {
-  background: #2A2A2A;
-  color: #FC6F53;
-}
-.controls button.active {
-  background: #FC6F53;
-  color: #0C0D0D;
-}
+        .controls button {
+          padding: 8px 14px;
+          border-radius: 6px;
+          border: none;
+          font-weight: 500;
+          font-size: 0.9rem;
+          cursor: pointer;
+          background: #1A1A1A;
+          color: #CCCCCC;
+        }
+        .controls button:hover {
+          background: #2A2A2A;
+          color: #FC6F53;
+        }
+        .controls button.active {
+          background: #FC6F53;
+          color: #0C0D0D;
+        }
 
-/* Promo Cards */
-.promo-cards-container {
-  display: flex;
-  gap: 12px;
-  overflow-x: auto;
-  margin-bottom: 24px;
-  padding-bottom: 4px;
-}
+        /* Promo Cards */
+        .promo-cards-container {
+          display: flex;
+          gap: 12px;
+          overflow-x: auto;
+          margin-bottom: 24px;
+          padding-bottom: 4px;
+        }
 
-.promo-card {
-  min-width: 150px;
-  min-height: 140px;
-  background: #1A1A1A;
-  border-radius: 8px;
-  padding: 16px;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  color: #FFFFFF;
-}
+        .promo-card {
+          min-width: 150px;
+          min-height: 140px;
+          background: #1A1A1A;
+          border-radius: 8px;
+          padding: 16px;
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          justify-content: center;
+          color: #FFFFFF;
+        }
 
-.promo-card .name {
-  font-weight: 600;
-  font-size: 1.2rem;
-  margin-bottom: 4px;
-  color: #FC6F53;
-}
+        .promo-card .name {
+          font-weight: 600;
+          font-size: 1.2rem;
+          margin-bottom: 4px;
+          color: #FC6F53;
+        }
 
-.promo-card .rank,
-.promo-card .days-in-rank {
-  font-size: 0.9rem;
-  color: #AAAAAA;
-  margin-bottom: 4px;
-}
+        .promo-card .rank,
+        .promo-card .days-in-rank {
+          font-size: 0.9rem;
+          color: #AAAAAA;
+          margin-bottom: 4px;
+        }
 
-.promo-card .promo-label {
-  background: #FC6F53;
-  color: #0C0D0D;
-  padding: 4px 10px;
-  border-radius: 12px;
-  font-weight: 600;
-  font-size: 0.8rem;
-}
+        .promo-card .promo-label {
+          background: #FC6F53;
+          color: #0C0D0D;
+          padding: 4px 10px;
+          border-radius: 12px;
+          font-weight: 600;
+          font-size: 0.8rem;
+        }
 
-/* Table */
-table {
-  width: 100%;
-  border-collapse: collapse;
-  background: #121212;
-  color: #E0E0E0;
-}
+        /* Table */
+        table {
+          width: 100%;
+          border-collapse: collapse;
+          background: #121212;
+          color: #E0E0E0;
+        }
 
-thead tr {
-  background: #1A1A1A;
-  color: #FC6F53;
-}
+        thead tr {
+          background: #1A1A1A;
+          color: #FC6F53;
+        }
 
-thead th {
-  padding: 12px 10px;
-  text-align: left;
-  font-weight: 600;
-  font-size: 0.95rem;
-  cursor: pointer;
-}
+        thead th {
+          padding: 12px 10px;
+          text-align: left;
+          font-weight: 600;
+          font-size: 0.95rem;
+          cursor: pointer;
+        }
 
-thead th:hover {
-  background: #222;
-}
+        thead th:hover {
+          background: #222;
+        }
 
-tbody tr {
-  border-top: 1px solid #2A2A2A;
-}
+        tbody tr {
+          border-top: 1px solid #2A2A2A;
+        }
 
-tbody tr:hover {
-  background: #1E1E1E;
-}
+        tbody tr:hover {
+          background: #1E1E1E;
+        }
 
-tbody td {
-  padding: 10px 12px;
-  font-size: 0.9rem;
-}
+        tbody td {
+          padding: 10px 12px;
+          font-size: 0.9rem;
+        }
 
-/* Loading container */
-.loading-container {
-  display: flex;
-  height: 100vh;
-  justify-content: center;
-  align-items: center;
-  font-size: 1.2rem;
-  color: #999;
-}
-
+        /* Loading container */
+        .loading-container {
+          display: flex;
+          height: 100vh;
+          justify-content: center;
+          align-items: center;
+          font-size: 1.2rem;
+          color: #999;
+        }
       `}</style>
 
       <div className="container" role="main" aria-label="Clan Members List">
@@ -328,7 +349,6 @@ tbody td {
                   <div className="rank">{m.rank}</div>
                   <div className="days-in-rank">{days} day{days !== 1 ? 's' : ''} in rank</div>
                   <div className="promo-label">Ready for Promotion</div>
-                  
                 </div>
               );
             })}
@@ -345,6 +365,14 @@ tbody td {
             onChange={(e) => setFilterText(e.target.value)}
             aria-label="Filter clan members by name"
           />
+          <button
+            onClick={() => handleSort('importance')}
+            className={sortKey === 'importance' ? 'active' : ''}
+            aria-pressed={sortKey === 'importance'}
+            title="Sort by importance"
+          >
+            Importance {sortKey === 'importance' ? (sortAsc ? '▲' : '▼') : ''}
+          </button>
           <button
             onClick={() => handleSort('name')}
             className={sortKey === 'name' ? 'active' : ''}
@@ -366,11 +394,27 @@ tbody td {
         <table role="table" aria-label="Clan members table">
           <thead>
             <tr>
-              <th scope="col" onClick={() => handleSort('name')} tabIndex={0} role="button" aria-sort={sortKey === 'name' ? (sortAsc ? 'ascending' : 'descending') : 'none'}>
+              <th
+                scope="col"
+                onClick={() => handleSort('name')}
+                tabIndex={0}
+                role="button"
+                aria-sort={
+                  sortKey === 'name' ? (sortAsc ? 'ascending' : 'descending') : 'none'
+                }
+              >
                 Name {sortKey === 'name' ? (sortAsc ? '▲' : '▼') : ''}
               </th>
               <th scope="col">Rank</th>
-              <th scope="col" onClick={() => handleSort('joined')} tabIndex={0} role="button" aria-sort={sortKey === 'joined' ? (sortAsc ? 'ascending' : 'descending') : 'none'}>
+              <th
+                scope="col"
+                onClick={() => handleSort('joined')}
+                tabIndex={0}
+                role="button"
+                aria-sort={
+                  sortKey === 'joined' ? (sortAsc ? 'ascending' : 'descending') : 'none'
+                }
+              >
                 Joined {sortKey === 'joined' ? (sortAsc ? '▲' : '▼') : ''}
               </th>
               <th scope="col">Membership Duration</th>
@@ -388,11 +432,10 @@ tbody td {
                   {(() => {
                     const days = getDaysInCurrentRank(member.name, member.rank, member.joined);
                     return days !== null && isEligibleForPromotion(member.rank, days)
-                      ? '✅ Eligible'
-                      : '';
+                      ? 'Eligible'
+                      : '-';
                   })()}
                 </td>
-
               </tr>
             ))}
           </tbody>
