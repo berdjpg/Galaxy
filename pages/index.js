@@ -328,6 +328,7 @@ tbody td {
                   <div className="rank">{m.rank}</div>
                   <div className="days-in-rank">{days} day{days !== 1 ? 's' : ''} in rank</div>
                   <div className="promo-label">Ready for Promotion</div>
+                  
                 </div>
               );
             })}
@@ -373,6 +374,7 @@ tbody td {
                 Joined {sortKey === 'joined' ? (sortAsc ? '▲' : '▼') : ''}
               </th>
               <th scope="col">Membership Duration</th>
+              <th scope="col">Promotion Eligibility</th>
             </tr>
           </thead>
           <tbody>
@@ -382,6 +384,15 @@ tbody td {
                 <td>{member.rank}</td>
                 <td>{formatDate(member.joined)}</td>
                 <td>{getMembershipDuration(member.joined)}</td>
+                <td>
+                  {(() => {
+                    const days = getDaysInCurrentRank(member.name, member.rank, member.joined);
+                    return days !== null && isEligibleForPromotion(member.rank, days)
+                      ? '✅ Eligible'
+                      : '';
+                  })()}
+                </td>
+
               </tr>
             ))}
           </tbody>
