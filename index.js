@@ -23,6 +23,7 @@ export default function Home() {
   if (loading) return <p>Loading clan members...</p>;
   if (!members.length) return <p>No clan members found.</p>;
 
+  
   return (
     <div style={{ maxWidth: 700, margin: 'auto', padding: 20, fontFamily: 'Arial, sans-serif' }}>
       <h1>Clan Members - Remenant</h1>
