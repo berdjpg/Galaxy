@@ -12,20 +12,20 @@ const downTriangle = '▼';
 
 // Rank order with lowercase keys for safe lookup
 const rankOrder = {
-  recruit: 1,
-  corporal: 2,
-  sergeant: 3,
-  lieutenant: 4,
-  captain: 5,
-  general: 6,
-  admin: 7,
-  organiser: 8,
-  coordinator: 9,
-  overseer: 10,
+  'recruit': 1,
+  'corporal': 2,
+  'sergeant': 3,
+  'lieutenant': 4,
+  'captain': 5,
+  'general': 6,
+  'admin': 7,
+  'organiser': 8,
+  'coordinator': 9,
+  'overseer': 10,
   'deputy owner': 11,
-  owner: 12,
-  // Add all ranks you have here, lowercase and exact spelling
+  'owner': 12,
 };
+
 
 export default function Home() {
   const [members, setMembers] = useState([]);
