@@ -239,6 +239,10 @@ export default function Home() {
                 rankChangeIndicator = (
                   <span style={{ color: 'red', fontWeight: 'bold', marginLeft: 4 }}>{downTriangle}</span>
                 );
+              } else {
+                rankChangeIndicator = (
+                  <span style={{ color: 'blue', fontWeight: 'bold', marginLeft: 4 }}>{downTriangle}</span>
+                );
               }
             }
 
