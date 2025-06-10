@@ -87,11 +87,11 @@ export default function Home() {
       const viewportWidth = window.innerWidth;
       const viewportHeight = window.innerHeight;
 
-      // Try to position popup above the row
-      let top = rowRect.top + window.scrollY - popupHeight - margin;
-      if (top < window.scrollY) {
-        // Not enough space above, place below
-        top = rowRect.bottom + window.scrollY + margin;
+      // Try to position popup below the row
+      let top = rowRect.bottom + window.scrollY + margin;
+      if (top + popupHeight > window.scrollY + viewportHeight) {
+        // Not enough space below, place above
+        top = rowRect.top + window.scrollY - popupHeight - margin;
       }
 
       // Align left with row but keep in viewport horizontally
