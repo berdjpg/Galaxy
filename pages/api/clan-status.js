@@ -1,4 +1,5 @@
 import { createClient } from '@supabase/supabase-js';
+import iconv from 'iconv-lite';
 
 const SUPABASE_URL = process.env.SUPABASE_URL;
 const SUPABASE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY;
@@ -23,7 +24,10 @@ export default async function handler(req, res) {
       return res.status(500).json({ error: 'Failed to fetch clan data' });
     }
 
-    const csvText = await clanResponse.text();
+    // Read response as buffer and decode with Windows-1252 encoding
+    const buffer = Buffer.from(await clanResponse.arrayBuffer());
+    const csvText = iconv.decode(buffer, 'win1252');
+
     const lines = csvText.trim().split('\n').filter(line => line.trim() !== '');
 
     if (lines.length < 2) {
