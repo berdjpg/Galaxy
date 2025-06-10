@@ -35,13 +35,21 @@ export default async function handler(req, res) {
 
     const members = lines.map(line => {
       const cols = line.split(',');
-      return {
-        name: cols[0].trim(),
-        rank: cols[1].trim(),
-      };
+
+      // Normalize and clean spaces to fix broken characters or spaces
+      const name = cols[0]
+        .replace(/\s+/g, ' ')  // Replace any whitespace runs with single space
+        .trim()
+        .normalize('NFC');      // Normalize unicode characters (NFC is standard)
+
+      const rank = cols[1]
+        .trim()
+        .normalize('NFC');
+
+      return { name, rank };
     });
 
-    // Fetch existing members from Supabase, now including previous_rank
+    // Fetch existing members from Supabase, including previous_rank etc.
     const { data: existingMembers, error: selectError } = await supabase
       .from('clan_members')
       .select('name, rank, previous_rank, joined, rank_changed');
