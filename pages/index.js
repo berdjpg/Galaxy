@@ -230,7 +230,7 @@ export default function Home() {
             const demoted = currRankValue < prevRankValue;
 
             let rankChangeIndicator = null;
-            if (rank_changed) {
+            if (Boolean(rank_changed)) {
               if (promoted) {
                 rankChangeIndicator = (
                   <span style={{ color: 'green', fontWeight: 'bold', marginLeft: 4 }}>{upTriangle}</span>
@@ -258,7 +258,6 @@ export default function Home() {
                 <td style={{ padding: '8px 12px', whiteSpace: 'nowrap' }}>
                   {rank}
                   {rankChangeIndicator}
-                  {downTriangle}
                 </td>
                 <td style={{ padding: '8px 12px', whiteSpace: 'nowrap' }}>{previous_rank || '-'}</td>
                 <td style={{ padding: '8px 12px' }}>{formatDate(joined)}</td>
