@@ -10,6 +10,23 @@ function formatDate(timestamp) {
 const upTriangle = '▲';
 const downTriangle = '▼';
 
+// Define your rank order here for comparison
+const rankOrder = {
+  'Recruit': 1,
+  'Corporal': 2,
+  'Sergeant': 3,
+  'Lieutenant': 4,
+  'Captain': 5,
+  'General': 6,
+  'Admin': 7,
+  'Organiser': 8,
+  'Coordinator': 9,
+  'Overseer': 10,
+  'Deputy Owner': 11,
+  'Owner': 12,
+  // Add all ranks you have here with increasing order
+};
+
 export default function Home() {
   const [members, setMembers] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -204,22 +221,18 @@ export default function Home() {
           {filteredSortedMembers.map(({ name, rank, previous_rank, joined, rank_changed }) => {
             const membershipDuration = getMembershipDuration(joined);
 
-            // Determine arrow & color for rank change
-            // Simple heuristic: if previous_rank is known and different
-            // You can define your rank order logic here if you have numeric ranks
+            // Determine arrow & color for rank change with rankOrder map
             let rankChangeIndicator = null;
-            if (rank_changed && previous_rank) {
-              // Example: show green up arrow if promoted, red down if demoted
-              // If you want to compare rank order, you need rank hierarchy data.
-              // For now, just show up arrow green, else down arrow red
-              const promoted = previous_rank < rank ? false : true; // Adjust this logic if ranks are strings
-              // Since ranks are strings, let's just show green up for rank_changed true, red down for demo.
-              // Or if rank lex order increased or decreased:
-              const promotedLex = previous_rank.localeCompare(rank) > 0; // previous_rank > current rank means demoted
-              rankChangeIndicator = promotedLex ? (
-                <span style={{ color: 'red', fontWeight: 'bold', marginLeft: 4 }}>{downTriangle}</span>
-              ) : (
+
+            if (rank_changed) {
+              const prevRankValue = rankOrder[previous_rank] || 0;
+              const currRankValue = rankOrder[rank] || 0;
+              const promoted = currRankValue > prevRankValue;
+
+              rankChangeIndicator = promoted ? (
                 <span style={{ color: 'green', fontWeight: 'bold', marginLeft: 4 }}>{upTriangle}</span>
+              ) : (
+                <span style={{ color: 'red', fontWeight: 'bold', marginLeft: 4 }}>{downTriangle}</span>
               );
             }
 
