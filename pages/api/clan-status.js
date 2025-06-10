@@ -99,6 +99,7 @@ export default async function handler(req, res) {
         const rankChanged = existing.rank !== member.rank;
 
         if (rankChanged) {
+          // Update member with new rank and previous rank
           const { error: updateError } = await supabase
             .from('clan_members')
             .update({
@@ -110,6 +111,21 @@ export default async function handler(req, res) {
           if (updateError) {
             console.error('Update error for member', member.name, updateError);
             return res.status(500).json({ error: 'Database update error' });
+          }
+
+          // Insert a new record in rank_change_history
+          const { error: historyError } = await supabase
+            .from('rank_change_history')
+            .insert([{
+              member_name: member.name,
+              old_rank: existing.rank,
+              new_rank: member.rank,
+              changed_at: now,
+            }]);
+
+          if (historyError) {
+            console.error('Insert error in rank_change_history for member', member.name, historyError);
+            return res.status(500).json({ error: 'Database history insert error' });
           }
 
           changes.rankChanges.push({
