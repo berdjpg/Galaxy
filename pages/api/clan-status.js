@@ -16,7 +16,6 @@ export default async function handler(req, res) {
   }
   console.log('Cron job triggered at', new Date().toISOString());
 
-
   try {
     const clanResponse = await fetch(CLAN_API_URL);
     if (!clanResponse.ok) {
@@ -42,10 +41,10 @@ export default async function handler(req, res) {
       };
     });
 
-    // Fetch existing members from Supabase
+    // Fetch existing members from Supabase, now including previous_rank
     const { data: existingMembers, error: selectError } = await supabase
       .from('clan_members')
-      .select('name, rank, joined, rank_changed');
+      .select('name, rank, previous_rank, joined, rank_changed');
 
     if (selectError) {
       console.error('Supabase select error:', selectError);
@@ -68,10 +67,11 @@ export default async function handler(req, res) {
       const existing = existingMap[member.name];
 
       if (!existing) {
-        // New member: insert with current timestamp
+        // New member: insert with current timestamp, previous_rank null
         const newMember = {
           name: member.name,
           rank: member.rank,
+          previous_rank: null,
           joined: now,
           rank_changed: false,
         };
@@ -94,6 +94,7 @@ export default async function handler(req, res) {
           const { error: updateError } = await supabase
             .from('clan_members')
             .update({
+              previous_rank: existing.rank, // save old rank
               rank: member.rank,
               rank_changed: true,
             })
@@ -111,10 +112,10 @@ export default async function handler(req, res) {
             joined: existing.joined,
           });
         } else if (existing.rank_changed) {
-          // Reset stale rank_changed flag
+          // Reset stale rank_changed flag and clear previous_rank
           await supabase
             .from('clan_members')
-            .update({ rank_changed: false })
+            .update({ rank_changed: false, previous_rank: null })
             .eq('name', member.name);
         }
       }
