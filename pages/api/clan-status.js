@@ -2,6 +2,7 @@ import { createClient } from '@supabase/supabase-js';
 
 const SUPABASE_URL = process.env.SUPABASE_URL;
 const SUPABASE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY;
+const CRON_SECRET = process.env.CRON_SECRET;
 
 const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
 
@@ -9,6 +10,11 @@ const CLAN_NAME = 'remenant';
 const CLAN_API_URL = `http://services.runescape.com/m=clan-hiscores/members_lite.ws?clanName=${CLAN_NAME}`;
 
 export default async function handler(req, res) {
+  // 🔒 Authorization check
+  if (req.headers.authorization !== `Bearer ${CRON_SECRET}`) {
+    return res.status(401).json({ error: 'Unauthorized' });
+  }
+
   try {
     const clanResponse = await fetch(CLAN_API_URL);
     if (!clanResponse.ok) {
@@ -28,14 +34,12 @@ export default async function handler(req, res) {
 
     const members = lines.map(line => {
       const cols = line.split(',');
-
       return {
         name: cols[0].trim(),
         rank: cols[1].trim(),
       };
     });
 
-    // Fetch existing members from DB
     const { data: existingMembers, error: selectError } = await supabase
       .from('clan_members')
       .select('name, rank, joined, rank_changed');
@@ -61,7 +65,7 @@ export default async function handler(req, res) {
       const existing = existingMap[member.name];
 
       if (!existing) {
-        // New member: insert into DB with current timestamp
+        // New member: insert with current timestamp
         const newMember = {
           name: member.name,
           rank: member.rank,
@@ -80,7 +84,7 @@ export default async function handler(req, res) {
 
         changes.newMembers.push(newMember);
       } else {
-        // Existing member: check for rank change
+        // Rank change detection
         const rankChanged = existing.rank !== member.rank;
 
         if (rankChanged) {
@@ -104,7 +108,7 @@ export default async function handler(req, res) {
             joined: existing.joined,
           });
         } else if (existing.rank_changed) {
-          // Reset rank_changed if no longer changed
+          // Reset stale rank_changed flag
           await supabase
             .from('clan_members')
             .update({ rank_changed: false })
