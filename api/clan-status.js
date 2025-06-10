@@ -17,8 +17,26 @@ export default async function handler(req, res) {
       return res.status(500).json({ error: 'Failed to fetch clan data' });
     }
 
-    const clanData = await clanResponse.json();
-    const members = clanData.members; // Array of {name, joined, rank}
+    const csvText = await clanResponse.text();
+
+    // Example CSV output starts like:
+    // Clanmate,Rank,Joined
+    // player1,General,1623456789
+    // player2,Recruit,1621234567
+
+    // Parse CSV into array of members:
+    const lines = csvText.trim().split('\n');
+    const header = lines.shift().split(',');
+
+    const members = lines.map(line => {
+      const cols = line.split(',');
+      return {
+        name: cols[0],
+        rank: cols[1],
+        joined: parseInt(cols[2], 10),
+      };
+    });
+
 
     if (!members || !Array.isArray(members)) {
       console.error('Invalid clan data format:', clanData);
