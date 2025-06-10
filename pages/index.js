@@ -229,6 +229,17 @@ export default function Home() {
             const promoted = currRankValue > prevRankValue;
             const demoted = currRankValue < prevRankValue;
 
+            console.log(`[DEBUG] ${name}:`, {
+  rank_changed,
+  rank,
+  previous_rank,
+  currRankValue,
+  prevRankValue,
+  promoted,
+  demoted,
+});
+
+
             let rankChangeIndicator = null;
             if (Boolean(rank_changed)) {
               if (promoted) {
