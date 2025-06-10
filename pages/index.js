@@ -9,16 +9,16 @@ function formatDate(timestamp) {
 
 // Promotion time requirements in days per rank to get promoted
 const promotionTimes = {
-  recruit: 7,         // days to promote from recruit
-  corporal: 14,
-  sergeant: 30,
-  lieutenant: 60,
-  captain: 90,
-  general: 120,
-  admin: 180,
-  organiser: 240,
-  coordinator: 300,
-  overseer: 365,
+  recruit:  7,         // days to promote from recruit
+  corporal: 0,
+  sergeant: 0,
+  lieutenant: 91,
+  captain: 0,
+  general: 0,
+  admin: 0,
+  organiser: 0,
+  coordinator: 0,
+  overseer: 0,
   'deputy owner': 0,
   owner: 0,
 };
@@ -292,14 +292,13 @@ export default function Home() {
               textAlign: 'left',
             }}
           >
-            {['name', 'rank', 'joined', 'membershipDuration', 'daysInRank', 'promotionStatus'].map(key => {
+            {['name', 'rank', 'joined', 'membershipDuration', 'promotionStatus'].map(key => {
               const labels = {
                 name: 'Name',
                 rank: 'Rank',
                 joined: 'Joined',
-                membershipDuration: 'Membership Duration',
-                daysInRank: 'Days in Rank',
-                promotionStatus: 'Promotion Status',
+                membershipDuration: 'Time in clan',
+                promotionStatus: 'Status',
               };
               return (
                 <th
@@ -309,10 +308,10 @@ export default function Home() {
                     padding: '10px 12px',
                     whiteSpace: 'nowrap',
                     userSelect: 'none',
-                    cursor: key === 'daysInRank' || key === 'promotionStatus' ? 'default' : 'pointer',
-                    color: key === 'daysInRank' || key === 'promotionStatus' ? '#666' : undefined,
+                    cursor: key === 'promotionStatus' ? 'default' : 'pointer',
+                    color: key === 'promotionStatus' ? '#666' : undefined,
                   }}
-                  title={key === 'daysInRank' || key === 'promotionStatus' ? undefined : `Sort by ${labels[key]}`}
+                  title={key === 'promotionStatus' ? undefined : `Sort by ${labels[key]}`}
                 >
                   {labels[key]} {sortKey === key ? (sortAsc ? '▲' : '▼') : ''}
                 </th>
@@ -344,9 +343,6 @@ export default function Home() {
                 <td style={{ padding: '10px 12px', fontFamily: 'monospace' }}>{rank}</td>
                 <td style={{ padding: '10px 12px', whiteSpace: 'nowrap' }}>{formatDate(joined)}</td>
                 <td style={{ padding: '10px 12px', whiteSpace: 'nowrap' }}>{getMembershipDuration(joined)}</td>
-                <td style={{ padding: '10px 12px', whiteSpace: 'nowrap' }}>
-                  {daysInRank !== null ? daysInRank : 'N/A'}
-                </td>
                 <td
                   style={{
                     padding: '10px 12px',
@@ -355,7 +351,7 @@ export default function Home() {
                     whiteSpace: 'nowrap',
                   }}
                 >
-                  {promotionReady ? 'Eligible' : 'Not eligible'}
+                  {promotionReady ? 'Eligible' : '-'}
                 </td>
               </tr>
             );
