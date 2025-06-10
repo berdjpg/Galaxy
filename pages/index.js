@@ -1,4 +1,4 @@
-import { useEffect, useState, useMemo, useRef } from 'react';
+import { useEffect, useState, useMemo } from 'react';
 
 // Format a date from timestamp or string
 function formatDate(timestamp) {
@@ -7,9 +7,9 @@ function formatDate(timestamp) {
   return isNaN(date) ? 'Invalid Date' : date.toLocaleDateString() + ' ' + date.toLocaleTimeString();
 }
 
-// Promotion time requirements in days per rank to get promoted
+// Promotion time requirements (can be kept if you want promotion cards without history)
 const promotionTimes = {
-  recruit:  7,
+  recruit: 7,
   corporal: 0,
   sergeant: 0,
   lieutenant: 91,
@@ -23,23 +23,8 @@ const promotionTimes = {
   owner: 0,
 };
 
-// Get days member has been in current rank, using rank history or join date fallback
-function getDaysInCurrentRank(memberName, rankHistories, currentRank, joinedAt) {
-  if (!rankHistories || !rankHistories[memberName] || rankHistories[memberName].length === 0) {
-    const joinDate = new Date(joinedAt);
-    const now = new Date();
-    if (isNaN(joinDate)) return null;
-    return Math.floor((now - joinDate) / (1000 * 60 * 60 * 24));
-  }
-  const history = rankHistories[memberName];
-  for (let entry of history) {
-    if ((entry.new_rank || '').toLowerCase() === currentRank.toLowerCase()) {
-      const changedAt = new Date(entry.changed_at);
-      const now = new Date();
-      if (isNaN(changedAt)) return null;
-      return Math.floor((now - changedAt) / (1000 * 60 * 60 * 24));
-    }
-  }
+// Get days member has been in current rank using only join date
+function getDaysInCurrentRank(memberName, currentRank, joinedAt) {
   const joinDate = new Date(joinedAt);
   const now = new Date();
   if (isNaN(joinDate)) return null;
@@ -60,89 +45,20 @@ export default function Home() {
   const [sortAsc, setSortAsc] = useState(true);
   const [filterText, setFilterText] = useState('');
 
-  const [hoveredMember, setHoveredMember] = useState(null);
-  const [historyData, setHistoryData] = useState([]);
-  const [historyLoading, setHistoryLoading] = useState(false);
-  const hoveredRowRef = useRef(null);
-  const [popupStyle, setPopupStyle] = useState({ top: 0, left: 0, opacity: 0 });
-
-  const [rankHistories, setRankHistories] = useState({});
-
   useEffect(() => {
-    async function fetchMembersAndHistories() {
+    async function fetchMembers() {
       try {
         const res = await fetch('/api/members');
         const data = await res.json();
         setMembers(data);
-
-        const histories = {};
-        await Promise.all(
-          data.map(async (m) => {
-            try {
-              const resHist = await fetch(`/api/rank_history?member=${encodeURIComponent(m.name)}`);
-              if (!resHist.ok) throw new Error('Failed to fetch history');
-              const histData = await resHist.json();
-              histories[m.name] = histData;
-            } catch {
-              histories[m.name] = [];
-            }
-          })
-        );
-        setRankHistories(histories);
         setLoading(false);
       } catch (err) {
-        console.error('Error fetching members or histories:', err);
+        console.error('Error fetching members:', err);
         setLoading(false);
       }
     }
-    fetchMembersAndHistories();
+    fetchMembers();
   }, []);
-
-  useEffect(() => {
-    if (!hoveredMember) {
-      setHistoryData([]);
-      setPopupStyle(style => ({ ...style, opacity: 0 }));
-      return;
-    }
-    async function fetchHistory() {
-      setHistoryLoading(true);
-      try {
-        const res = await fetch(`/api/rank_history?member=${encodeURIComponent(hoveredMember)}`);
-        if (!res.ok) throw new Error('Failed to fetch history');
-        const data = await res.json();
-        setHistoryData(data);
-      } catch (e) {
-        console.error(e);
-        setHistoryData([]);
-      }
-      setHistoryLoading(false);
-    }
-    fetchHistory();
-
-    if (hoveredRowRef.current) {
-      const rowRect = hoveredRowRef.current.getBoundingClientRect();
-      const popupWidth = 320;
-      const popupHeight = 300;
-      const margin = 8;
-      const viewportWidth = window.innerWidth;
-      const viewportHeight = window.innerHeight;
-
-      let top = rowRect.bottom + window.scrollY + margin;
-      if (top + popupHeight > window.scrollY + viewportHeight) {
-        top = rowRect.top + window.scrollY - popupHeight - margin;
-      }
-
-      let left = rowRect.left + window.scrollX;
-      if (left + popupWidth > window.scrollX + viewportWidth) {
-        left = window.scrollX + viewportWidth - popupWidth - margin;
-      }
-      if (left < window.scrollX + margin) {
-        left = window.scrollX + margin;
-      }
-
-      setPopupStyle({ top, left, opacity: 1 });
-    }
-  }, [hoveredMember]);
 
   const filteredSortedMembers = useMemo(() => {
     let filtered = [...members];
@@ -192,12 +108,13 @@ export default function Home() {
       : `${days} day${days !== 1 ? 's' : ''}`;
   };
 
+  // Optional: Remove promotion cards or keep, using only joined date
   const readyForPromotion = useMemo(() => {
     return members.filter(m => {
-      const days = getDaysInCurrentRank(m.name, rankHistories, m.rank, m.joined);
+      const days = getDaysInCurrentRank(m.name, m.rank, m.joined);
       return days !== null && isEligibleForPromotion(m.rank, days);
     });
-  }, [members, rankHistories]);
+  }, [members]);
 
   const handleSort = (key) => {
     if (sortKey === key) {
@@ -226,7 +143,6 @@ export default function Home() {
         userSelect: 'none',
         minHeight: '100vh',
       }}
-      onMouseLeave={() => setHoveredMember(null)}
     >
       <h1 style={{
         marginBottom: 24,
@@ -244,14 +160,13 @@ export default function Home() {
             gap: 16,
             overflowX: 'auto',
             paddingBottom: 4,
-            // hide scrollbar visually but allow scrolling
             scrollbarWidth: 'thin',
             scrollbarColor: '#4a90e2 transparent',
           }}
           className="promo-cards-container"
         >
           {readyForPromotion.map(m => {
-            const days = getDaysInCurrentRank(m.name, rankHistories, m.rank, m.joined);
+            const days = getDaysInCurrentRank(m.name, m.rank, m.joined);
             return (
               <div
                 key={m.name}
@@ -390,104 +305,31 @@ export default function Home() {
         }}
       >
         <thead>
-          <tr style={{ borderBottom: '2px solid #4791ff', userSelect: 'none' }}>
-            <th style={{ padding: '10px 12px', textAlign: 'left', cursor: 'pointer', userSelect: 'none' }} onClick={() => handleSort('name')}>
-              Name {sortKey === 'name' ? (sortAsc ? '▲' : '▼') : ''}
-            </th>
-            <th style={{ padding: '10px 12px', textAlign: 'center' }}>Rank</th>
-            <th style={{ padding: '10px 12px', textAlign: 'center', cursor: 'pointer', userSelect: 'none' }} onClick={() => handleSort('joined')}>
-              Joined {sortKey === 'joined' ? (sortAsc ? '▲' : '▼') : ''}
-            </th>
-            <th style={{ padding: '10px 12px', textAlign: 'center' }}>Days in Current Rank</th>
+          <tr>
+            <th style={{ padding: '12px 8px', borderBottom: '2px solid #444a66', textAlign: 'left' }}>Name</th>
+            <th style={{ padding: '12px 8px', borderBottom: '2px solid #444a66', textAlign: 'left' }}>Rank</th>
+            <th style={{ padding: '12px 8px', borderBottom: '2px solid #444a66', textAlign: 'left' }}>Joined</th>
+            <th style={{ padding: '12px 8px', borderBottom: '2px solid #444a66', textAlign: 'left' }}>Membership Duration</th>
           </tr>
         </thead>
         <tbody>
-          {filteredSortedMembers.map(m => {
-            const days = getDaysInCurrentRank(m.name, rankHistories, m.rank, m.joined);
-            return (
-              <tr
-                key={m.name}
-                ref={hoveredMember === m.name ? hoveredRowRef : null}
-                onMouseEnter={() => setHoveredMember(m.name)}
-                onMouseLeave={() => setHoveredMember(null)}
-                style={{
-                  cursor: 'default',
-                  backgroundColor: hoveredMember === m.name ? '#2a3c66' : 'transparent',
-                  transition: 'background-color 0.3s',
-                  userSelect: 'none',
-                }}
-              >
-                <td style={{ padding: '8px 12px' }}>{m.name}</td>
-                <td style={{ padding: '8px 12px', textAlign: 'center', fontWeight: '600', color: '#a0c1ff' }}>{m.rank}</td>
-                <td style={{ padding: '8px 12px', textAlign: 'center' }}>{formatDate(m.joined)}</td>
-                <td style={{ padding: '8px 12px', textAlign: 'center' }}>{days !== null ? days : 'N/A'}</td>
-              </tr>
-            );
-          })}
+          {filteredSortedMembers.map(member => (
+            <tr
+              key={member.name}
+              style={{ cursor: 'default', userSelect: 'none' }}
+            >
+              <td style={{ padding: '10px 8px', borderBottom: '1px solid #444a66' }}>{member.name}</td>
+              <td style={{ padding: '10px 8px', borderBottom: '1px solid #444a66' }}>{member.rank}</td>
+              <td style={{ padding: '10px 8px', borderBottom: '1px solid #444a66' }}>
+                {formatDate(member.joined)}
+              </td>
+              <td style={{ padding: '10px 8px', borderBottom: '1px solid #444a66' }}>
+                {getMembershipDuration(member.joined)}
+              </td>
+            </tr>
+          ))}
         </tbody>
       </table>
-
-      {/* Popup with rank history */}
-      {hoveredMember && (
-        <div
-          style={{
-            position: 'absolute',
-            top: popupStyle.top,
-            left: popupStyle.left,
-            width: 320,
-            maxHeight: 300,
-            backgroundColor: '#1c1c3a',
-            borderRadius: 10,
-            padding: 14,
-            color: '#a9c2ff',
-            boxShadow: '0 0 20px #4770ff',
-            fontSize: 13,
-            opacity: popupStyle.opacity,
-            transition: 'opacity 0.3s ease',
-            overflowY: 'auto',
-            zIndex: 10,
-            userSelect: 'text',
-          }}
-          onMouseEnter={() => setHoveredMember(hoveredMember)}
-          onMouseLeave={() => setHoveredMember(null)}
-        >
-          <div
-            style={{
-              fontWeight: '700',
-              marginBottom: 8,
-              fontSize: 16,
-              color: '#c7d1ff',
-              textShadow: '0 0 6px #5a78ff',
-            }}
-          >
-            {hoveredMember} - Rank History
-          </div>
-          {historyLoading ? (
-            <div>Loading history...</div>
-          ) : historyData.length === 0 ? (
-            <div>No rank history available.</div>
-          ) : (
-            <ul style={{ listStyleType: 'none', paddingLeft: 0, margin: 0 }}>
-              {historyData.map((entry, i) => (
-                <li
-                  key={i}
-                  style={{
-                    marginBottom: 6,
-                    paddingBottom: 6,
-                    borderBottom: '1px solid #3a3f66',
-                  }}
-                >
-                  <div style={{ fontWeight: '600', color: '#8bb0ff' }}>{entry.new_rank}</div>
-                  <div style={{ fontSize: 12, color: '#b0bbdd' }}>
-                    {formatDate(entry.changed_at)}
-                  </div>
-                  {entry.note && <div style={{ fontSize: 11, fontStyle: 'italic', marginTop: 2, color: '#95a0cc' }}>Note: {entry.note}</div>}
-                </li>
-              ))}
-            </ul>
-          )}
-        </div>
-      )}
     </div>
   );
 }
