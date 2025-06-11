@@ -17,21 +17,30 @@ export default async function rsnChangeHandler(req, res) {
   }
 
   try {
-    // Update the member's name based on the old name
-    const { data, error } = await supabase
+    // Find member with oldName ignoring case
+    const { data: member, error: findError } = await supabase
       .from('clan_members')
-      .update({ name: newName })
-      .ilike('name', oldName) // Case-insensitive match
-      .select()
-      .single(); // Expecting only one match
+      .select('*')
+      .ilike('name', oldName)
+      .maybeSingle();
 
-    if (error) throw error;
+    if (findError) throw findError;
 
-    if (!data) {
+    if (!member) {
       return res.status(404).json({ error: 'Member not found' });
     }
 
-    res.status(200).json({ message: 'RSN updated successfully', member: data });
+    // Update member's name by id
+    const { data: updatedMember, error: updateError } = await supabase
+      .from('clan_members')
+      .update({ name: newName })
+      .eq('id', member.id)
+      .select()
+      .single();
+
+    if (updateError) throw updateError;
+
+    res.status(200).json({ message: 'RSN updated successfully', member: updatedMember });
   } catch (error) {
     console.error(error);
     res.status(500).json({ error: 'Internal server error' });
