@@ -742,6 +742,7 @@ body::before {
                     </td>
                     <td>
                       <span className="rank-badge" style={{ background: rankColor }}>
+                        <img src={`https://runescape.wiki/images/${member.rank}_clan_rank.png`} alt="Rank" />
                         {member.rank}
                       </span>
                     </td>
