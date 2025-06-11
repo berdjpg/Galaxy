@@ -699,8 +699,18 @@ export default function Home() {
                     {sortKey === 'joined' ? (sortAsc ? '↑' : '↓') : '↕'}
                   </span>
                 </th>
-                <th>Duration</th>
-                <th>Status</th>
+                <th onClick={() => handleSort('duration')} className={sortKey === 'duration' ? 'active' : ''}>
+                  Time in clan
+                  <span className="sort-indicator">
+                    {sortKey === 'duration' ? (sortAsc ? '↑' : '↓') : '↕'}
+                  </span>
+                </th>
+                <th onClick={() => handleSort('status')} className={sortKey === 'status' ? 'active' : ''}>
+                  Status
+                  <span className="sort-indicator">
+                    {sortKey === 'status' ? (sortAsc ? '↑' : '↓') : '↕'}
+                  </span>
+                </th>
               </tr>
             </thead>
             <tbody className="table-body">
