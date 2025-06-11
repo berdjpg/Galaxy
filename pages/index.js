@@ -199,7 +199,7 @@ export default function Home() {
           margin: 0;
           padding: 0;
           height: 100%;
-          background: linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #0f172a 100%);
+          background: linear-gradient(135deg,rgb(0, 0, 0) 0%, #1e293b 50%, #0f172a 100%);
           color: #e2e8f0;
           font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
           -webkit-font-smoothing: antialiased;
@@ -247,10 +247,6 @@ export default function Home() {
           justify-content: center;
           gap: 1rem;
           margin-bottom: 0.5rem;
-        }
-
-        .crown-icon {
-          font-size: 2.5rem;
         }
 
         .main-title {
@@ -624,8 +620,7 @@ export default function Home() {
         {/* Header */}
         <div className="header">
           <div className="header-title">
-            <span className="crown-icon">👑</span>
-            <h1 className="main-title">Remenant Clan</h1>
+            <h1 className="main-title">Remenant</h1>
           </div>
           <p className="subtitle">Member management dashboard</p>
         </div>
