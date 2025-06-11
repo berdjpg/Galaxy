@@ -635,27 +635,40 @@ body::before {
               <h2>Action needed</h2>
             </div>
             <div className="promo-cards-grid">
-              {readyForPromotion.map((m) => {
-                const days = getDaysInCurrentRank(m.name, m.rank, m.joined);
-                const rankColor = rankColors[m.rank.toLowerCase()] || rankColors.recruit;
+              {readyForPromotion.map(member => {
+                const days = getDaysInCurrentRank(member.name, member.rank, member.joined);
+                const currentRankImportance = rankImportance[member.rank.toLowerCase()];
+                const nextRank = Object.entries(rankImportance)
+                  .find(([, imp]) => imp === currentRankImportance + 1)?.[0];
+
                 return (
-                  <div key={m.name} className="promo-card">
+                  <div key={member.name} className="promo-card">
                     <div className="promo-card-header">
-                      <div className="rank-avatar" style={{ background: rankColor }}>
-                        {m.name.charAt(0).toUpperCase()}
+                      <div
+                        className="rank-avatar"
+                        style={{ background: rankColors[member.rank.toLowerCase()] }}
+                      >
+                        {member.rank[0].toUpperCase()}
                       </div>
-                      <div className="eligible-badge">Eligible</div>
+                      <span className="eligible-badge">Eligible</span>
                     </div>
-                    <h3 className="member-name">{m.name}</h3>
-                    <p className="member-rank">{m.rank}</p>
+                    <div className="member-name">{member.name}</div>
+                    <div className="member-rank">{member.rank}</div>
                     <div className="days-in-rank">
-                      <span className="clock-icon">🕐</span>
-                      {days} day{days !== 1 ? 's' : ''} in rank
+                      <span className="clock-icon">🕒</span>
+                      {days} days in rank
                     </div>
+                    {nextRank && (
+                      <div className="days-in-rank">
+                        <span className="clock-icon">➡️</span>
+                        Promote to <strong>{nextRank}</strong>
+                      </div>
+                    )}
                   </div>
                 );
               })}
             </div>
+
           </div>
         )}
 
