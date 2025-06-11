@@ -198,7 +198,8 @@ export default function Home() {
 html, body, #__next {
   margin: 0;
   padding: 0;
-  height: 100%;
+  min-height: 100%;
+  height: auto;
   background: linear-gradient(135deg, #000000 0%, #0f172a 50%, #0a0f1c 100%);
   color: #d1d5db;
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
