@@ -48,18 +48,18 @@ const rankImportance = {
 };
 
 const rankColors = {
-  owner: 'linear-gradient(135deg, #f5d76e, #f2c94c)',
-  'deputy owner': 'linear-gradient(135deg, #dcdcdc, #c0c0c0)',
-  overseer: 'linear-gradient(135deg, #cd7f32, #b87333)',
-  coordinator: 'linear-gradient(135deg, #e2c290, #d1a05f)',
-  organiser: 'linear-gradient(135deg, #b3d4fc, #79b8f3)',
-  admin: 'linear-gradient(135deg, #f87171, #ef4444)',
-  general: 'linear-gradient(135deg, #ffd700, #facc15)',
-  captain: 'linear-gradient(135deg, #dcdcdc, #a1a1aa)',
-  lieutenant: 'linear-gradient(135deg, #cd7f32, #a97142)',
-  sergeant: 'linear-gradient(135deg, #fbbf24, #f59e0b)',
-  corporal: 'linear-gradient(135deg, #9ca3af, #6b7280)',
-  recruit: 'linear-gradient(135deg, #e5e7eb, #d1d5db)',
+  owner: 'linear-gradient(135deg, rgba(245, 215, 110, 0.85), rgba(242, 201, 76, 0.85))',
+  'deputy owner': 'linear-gradient(135deg, rgba(220, 220, 220, 0.85), rgba(192, 192, 192, 0.85))',
+  overseer: 'linear-gradient(135deg, rgba(205, 127, 50, 0.85), rgba(184, 115, 51, 0.85))',
+  coordinator: 'linear-gradient(135deg, rgba(226, 194, 144, 0.85), rgba(209, 160, 95, 0.85))',
+  organiser: 'linear-gradient(135deg, rgba(179, 212, 252, 0.85), rgba(121, 184, 243, 0.85))',
+  admin: 'linear-gradient(135deg, rgba(248, 113, 113, 0.85), rgba(239, 68, 68, 0.85))',
+  general: 'linear-gradient(135deg, rgba(255, 215, 0, 0.85), rgba(250, 204, 21, 0.85))',
+  captain: 'linear-gradient(135deg, rgba(220, 220, 220, 0.85), rgba(161, 161, 170, 0.85))',
+  lieutenant: 'linear-gradient(135deg, rgba(205, 127, 50, 0.85), rgba(169, 113, 66, 0.85))',
+  sergeant: 'linear-gradient(135deg, rgba(251, 191, 36, 0.85), rgba(245, 158, 11, 0.85))',
+  corporal: 'linear-gradient(135deg, rgba(156, 163, 175, 0.85), rgba(107, 114, 128, 0.85))',
+  recruit: 'linear-gradient(135deg, rgba(229, 231, 235, 0.85), rgba(209, 213, 219, 0.85))',
 };
 
 function getDaysInCurrentRank(memberName, currentRank, joinedAt) {
@@ -671,7 +671,7 @@ body::before {
                         className="rank-avatar"
                         style={{ background: rankColors[current] }}
                       >
-                        {member.rank[0].toUpperCase()}
+                        <img src={`http://secure.runescape.com/m=avatar-rs/${member.name}/chat.png`} alt="Avatar" />
                       </div>
                       <span className="eligible-badge">Eligible</span>
                     </div>
