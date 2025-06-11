@@ -1,7 +1,7 @@
 {
   "crons": [
     {
-      "path": "/api/cron",
+      "path": "/api/clan-status",
       "schedule": "0 0 * * *"
     }
   ]
