@@ -180,6 +180,13 @@ export default function Home() {
     return expectedNext !== undefined;
   });
 
+  function formatRank(rank) {
+    if (rank === "Deputy Owner") {
+      return "Deputy_owner"; // special case
+    }
+    return rank.replace(/\s+/g, "_"); // default
+  }
+
   if (loading)
     return (
       <div className="loading-container">
@@ -742,7 +749,7 @@ body::before {
                     </td>
                     <td>
                       <span className="rank-badge" style={{ background: rankColor }}>
-                        <img src={`https://runescape.wiki/images/${member.rank.replace(/\s+/g, "_")}_clan_rank.png`} alt="Rank" />
+                        <img src={`https://runescape.wiki/images/${formatRank(member.rank)}_clan_rank.png`} alt="Rank" />
                         {member.rank}
                       </span>
                     </td>
