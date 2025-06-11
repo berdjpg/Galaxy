@@ -735,14 +735,14 @@ body::before {
                       <div className="member-cell">
                         <div className="member-avatar" style={{ background: rankColor }}>
                           {/* {member.name.charAt(0).toUpperCase()} */}
-                          <img src={`https://runescape.wiki/images/${member.rank.replace(/\s+/g, "_")}_clan_rank.png`} alt="Rank" />
+                          <img src={`http://secure.runescape.com/m=avatar-rs/${member.name}/chat.png`} alt="Avatar" />
                         </div>
                         <span className="member-name-cell">{member.name}</span>
                       </div>
                     </td>
                     <td>
                       <span className="rank-badge" style={{ background: rankColor }}>
-                        <img src={`https://runescape.wiki/images/${member.rank}_clan_rank.png`} alt="Rank" />
+                        <img src={`https://runescape.wiki/images/${member.rank.replace(/\s+/g, "_")}_clan_rank.png`} alt="Rank" />
                         {member.rank}
                       </span>
                     </td>
