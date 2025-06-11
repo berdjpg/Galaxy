@@ -75,6 +75,7 @@ function isEligibleForPromotion(currentRank, daysInRank) {
 }
 
 export default function Home() {
+  const [members, setMembers] = useState('');
 
   // Default sorting: by importance DESC
   const [sortKey, setSortKey] = useState('importance');
