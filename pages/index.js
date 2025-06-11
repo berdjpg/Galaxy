@@ -170,177 +170,190 @@ export default function Home() {
   return (
     <>
       <style>{`
-        * {
-          box-sizing: border-box;
-        }
-        body, html, #__next {
-          margin: 0;
-          padding: 0;
-          height: 100%;
-          background: #0C0D0D;
-          color: #E0E0E0;
-          font-family: 'Inter', sans-serif;
-        }
+* {
+  box-sizing: border-box;
+}
 
-        .container {
-          max-width: 900px;
-          margin: 40px auto;
-          padding: 20px;
-          background: #121212;
-          border-radius: 8px;
-          display: flex;
-          flex-direction: column;
-          min-height: 100vh;
-        }
+html, body, #__next {
+  margin: 0;
+  padding: 0;
+  height: 100%;
+  background-color: #0C0D0D;
+  color: #E0E0E0;
+  font-family: 'Inter', sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
 
-        h1 {
-          font-weight: 600;
-          font-size: 2rem;
-          margin-bottom: 24px;
-          color: #FC6F53;
-        }
+.container {
+  max-width: 900px;
+  margin: 40px auto;
+  padding: 24px;
+  background-color: #121212;
+  border-radius: 12px;
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  box-shadow: 0 0 12px rgba(0, 0, 0, 0.3);
+}
 
-        /* Controls */
-        .controls {
-          display: flex;
-          gap: 12px;
-          margin-bottom: 20px;
-          flex-wrap: wrap;
-          align-items: center;
-        }
+h1 {
+  font-size: 2rem;
+  font-weight: 600;
+  margin-bottom: 24px;
+  color: #FC6F53;
+}
 
-        .controls label {
-          font-weight: 500;
-          font-size: 0.9rem;
-        }
+/* Controls */
+.controls {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  align-items: center;
+  margin-bottom: 24px;
+}
 
-        .controls input[type="text"] {
-          flex-grow: 1;
-          max-width: 220px;
-          padding: 8px 12px;
-          font-size: 1rem;
-          border-radius: 6px;
-          border: 1px solid #2A2A2A;
-          background: #1A1A1A;
-          color: #FFF;
-        }
+.controls label {
+  font-size: 0.9rem;
+  font-weight: 500;
+}
 
-        .controls input[type="text"]:focus {
-          outline: 1px solid #FC6F53;
-          background: #1E1E1E;
-        }
+.controls input[type="text"] {
+  padding: 10px 14px;
+  font-size: 1rem;
+  border-radius: 8px;
+  border: 1px solid #2A2A2A;
+  background-color: #1A1A1A;
+  color: #FFF;
+  transition: all 0.2s ease-in-out;
+}
 
-        .controls button {
-          padding: 8px 14px;
-          border-radius: 6px;
-          border: none;
-          font-weight: 500;
-          font-size: 0.9rem;
-          cursor: pointer;
-          background: #1A1A1A;
-          color: #CCCCCC;
-        }
-        .controls button:hover {
-          background: #2A2A2A;
-          color: #FC6F53;
-        }
-        .controls button.active {
-          background: #FC6F53;
-          color: #0C0D0D;
-        }
+.controls input[type="text"]:focus {
+  outline: none;
+  border-color: #FC6F53;
+  background-color: #1E1E1E;
+}
 
-        /* Promo Cards */
-        .promo-cards-container {
-          display: flex;
-          gap: 12px;
-          overflow-x: auto;
-          margin-bottom: 24px;
-          padding-bottom: 4px;
-        }
+.controls button {
+  padding: 10px 16px;
+  border-radius: 8px;
+  border: none;
+  background-color: #1A1A1A;
+  color: #CCCCCC;
+  font-size: 0.9rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 0.2s ease, color 0.2s ease;
+}
 
-        .promo-card {
-          min-width: 150px;
-          min-height: 140px;
-          background: #1A1A1A;
-          border-radius: 8px;
-          padding: 16px;
-          display: flex;
-          flex-direction: column;
-          align-items: center;
-          justify-content: center;
-          color: #FFFFFF;
-        }
+.controls button:hover {
+  background-color: #2A2A2A;
+  color: #FC6F53;
+}
 
-        .promo-card .name {
-          font-weight: 600;
-          font-size: 1.2rem;
-          margin-bottom: 4px;
-          color: #FC6F53;
-        }
+.controls button.active {
+  background-color: #FC6F53;
+  color: #0C0D0D;
+}
 
-        .promo-card .rank,
-        .promo-card .days-in-rank {
-          font-size: 0.9rem;
-          color: #AAAAAA;
-          margin-bottom: 4px;
-        }
+/* Promo Cards */
+.promo-cards-container {
+  display: flex;
+  gap: 16px;
+  overflow-x: auto;
+  padding-bottom: 4px;
+  margin-bottom: 32px;
+}
 
-        .promo-card .promo-label {
-          background: #FC6F53;
-          color: #0C0D0D;
-          padding: 4px 10px;
-          border-radius: 12px;
-          font-weight: 600;
-          font-size: 0.8rem;
-        }
+.promo-card {
+  min-width: 160px;
+  background-color: #1A1A1A;
+  border-radius: 10px;
+  padding: 16px;
+  color: #FFFFFF;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
+  transition: transform 0.2s ease;
+}
 
-        /* Table */
-        table {
-          width: 100%;
-          border-collapse: collapse;
-          background: #121212;
-          color: #E0E0E0;
-        }
+.promo-card:hover {
+  transform: translateY(-2px);
+}
 
-        thead tr {
-          background: #1A1A1A;
-          color: #FC6F53;
-        }
+.promo-card .name {
+  font-size: 1.1rem;
+  font-weight: 600;
+  margin-bottom: 4px;
+  color: #FC6F53;
+}
 
-        thead th {
-          padding: 12px 10px;
-          text-align: left;
-          font-weight: 600;
-          font-size: 0.95rem;
-          cursor: pointer;
-        }
+.promo-card .rank,
+.promo-card .days-in-rank {
+  font-size: 0.85rem;
+  color: #AAAAAA;
+  margin-bottom: 4px;
+}
 
-        thead th:hover {
-          background: #222;
-        }
+.promo-card .promo-label {
+  background-color: #FC6F53;
+  color: #0C0D0D;
+  padding: 4px 10px;
+  border-radius: 999px;
+  font-size: 0.75rem;
+  font-weight: 600;
+}
 
-        tbody tr {
-          border-top: 1px solid #2A2A2A;
-        }
+/* Table */
+table {
+  width: 100%;
+  border-collapse: collapse;
+  background-color: #121212;
+}
 
-        tbody tr:hover {
-          background: #1E1E1E;
-        }
+thead tr {
+  background-color: #1A1A1A;
+}
 
-        tbody td {
-          padding: 10px 12px;
-          font-size: 0.9rem;
-        }
+thead th {
+  padding: 14px 12px;
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: #FC6F53;
+  text-align: left;
+  cursor: pointer;
+  transition: background 0.2s ease;
+}
 
-        /* Loading container */
-        .loading-container {
-          display: flex;
-          height: 100vh;
-          justify-content: center;
-          align-items: center;
-          font-size: 1.2rem;
-          color: #999;
-        }
+thead th:hover {
+  background-color: #222;
+}
+
+tbody tr {
+  border-top: 1px solid #2A2A2A;
+  transition: background 0.2s ease;
+}
+
+tbody tr:hover {
+  background-color: #1E1E1E;
+}
+
+tbody td {
+  padding: 12px;
+  font-size: 0.9rem;
+}
+
+/* Loading */
+.loading-container {
+  display: flex;
+  height: 100vh;
+  justify-content: center;
+  align-items: center;
+  font-size: 1.2rem;
+  color: #999;
+}
+
       `}</style>
 
       <div className="container" role="main" aria-label="Clan Members List">
