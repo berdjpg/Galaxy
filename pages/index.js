@@ -707,7 +707,8 @@ body::before {
                     <td>
                       <div className="member-cell">
                         <div className="member-avatar" style={{ background: rankColor }}>
-                          {member.name.charAt(0).toUpperCase()}
+                          {/* {member.name.charAt(0).toUpperCase()} */}
+                          <img src={`http://secure.runescape.com/m=avatar-rs/${member.name}/chat.png`} alt="Avatar" />
                         </div>
                         <span className="member-name-cell">{member.name}</span>
                       </div>
