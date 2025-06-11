@@ -75,18 +75,6 @@ function isEligibleForPromotion(currentRank, daysInRank) {
 }
 
 export default function Home() {
-  const [members, setMembers] = useState([
-    // Sample data for demonstration
-    { name: 'John Doe', rank: 'lieutenant', joined: '2024-01-15T10:30:00Z' },
-    { name: 'Jane Smith', rank: 'captain', joined: '2023-11-20T14:45:00Z' },
-    { name: 'Mike Johnson', rank: 'recruit', joined: '2025-05-28T09:15:00Z' },
-    { name: 'Sarah Wilson', rank: 'sergeant', joined: '2024-03-10T16:20:00Z' },
-    { name: 'Alex Brown', rank: 'general', joined: '2023-08-05T11:00:00Z' },
-    { name: 'Emma Davis', rank: 'admin', joined: '2024-12-01T13:30:00Z' },
-    { name: 'Chris Lee', rank: 'organiser', joined: '2023-10-15T08:45:00Z' },
-    { name: 'Lisa Taylor', rank: 'owner', joined: '2023-01-01T00:00:00Z' },
-  ]);
-  const [loading, setLoading] = useState(false);
 
   // Default sorting: by importance DESC
   const [sortKey, setSortKey] = useState('importance');
@@ -97,9 +85,9 @@ export default function Home() {
     async function fetchMembers() {
       try {
         // Simulating API call - in real app this would fetch from /api/members
-        // const res = await fetch('/api/members');
-        // const data = await res.json();
-        // setMembers(data);
+        const res = await fetch('/api/members');
+        const data = await res.json();
+        setMembers(data);
         setLoading(false);
       } catch (err) {
         console.error('Error fetching members:', err);
