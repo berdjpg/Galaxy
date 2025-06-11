@@ -398,6 +398,7 @@ body::before {
   transform: translateY(-50%);
   color: #64748b;
   font-size: 1.25rem;
+  z-index: 1;
 }
 
 .search-input {
