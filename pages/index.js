@@ -642,12 +642,23 @@ body::before {
                 const nextRank = Object.entries(rankImportance)
                   .find(([, imp]) => imp === currentRankImportance + 1)?.[0];
 
+                // Only allow Recruit → Lieutenant and Lieutenant → Captain
+                const validPromotions = {
+                  recruit: 'lieutenant',
+                  lieutenant: 'captain'
+                };
+
+                const normalizedCurrent = member.rank.toLowerCase();
+                const normalizedNext = nextRank?.toLowerCase();
+
+                if (validPromotions[normalizedCurrent] !== normalizedNext) return null;
+
                 return (
                   <div key={member.name} className="promo-card">
                     <div className="promo-card-header">
                       <div
                         className="rank-avatar"
-                        style={{ background: rankColors[member.rank.toLowerCase()] }}
+                        style={{ background: rankColors[normalizedCurrent] }}
                       >
                         {member.rank[0].toUpperCase()}
                       </div>
@@ -659,19 +670,17 @@ body::before {
                       <span className="clock-icon">🕒</span>
                       {days} days in rank
                     </div>
-                    {nextRank && (
-                      <div className="days-in-rank">
-                        <span className="clock-icon">➡️</span>
-                        Promote to <strong>{nextRank}</strong>
-                      </div>
-                    )}
+                    <div className="days-in-rank">
+                      <span className="clock-icon">➡️</span>
+                      Promote to <strong>{nextRank}</strong>
+                    </div>
                   </div>
                 );
               })}
             </div>
-
           </div>
         )}
+
 
         {/* Search */}
         <div className="search-section">
