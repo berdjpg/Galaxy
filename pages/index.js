@@ -500,6 +500,11 @@ body::before {
   font-size: 0.875rem;
   font-weight: 600;
   color: white;
+  background
+}
+
+.member-avatar img {
+  height: 166%;
 }
 
 .member-name-cell {
@@ -621,7 +626,6 @@ body::before {
           <div className="header-title">
             <h1 className="main-title">Remenant</h1>
           </div>
-          <p className="subtitle">Member management dashboard</p>
         </div>
 
         {/* Promotion Cards */}
@@ -740,6 +744,7 @@ body::before {
         {/* Footer */}
         <div className="footer">
           <p>Showing {filteredSortedMembers.length} of {members.length} members</p>
+          <p>Milk men / Sani btw</p>
         </div>
       </div>
     </>
