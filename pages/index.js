@@ -180,19 +180,6 @@ export default function Home() {
     return expectedNext !== undefined;
   });
 
-  const refreshClanStatus = async () => {
-  try {
-    const res = await fetch('/api/clan-status', {
-      method: 'POST', // or 'GET' if your endpoint expects GET
-    });
-    if (!res.ok) throw new Error('Failed to refresh clan status');
-    console.log('Clan status refreshed');
-  } catch (err) {
-    console.error('Error refreshing clan status:', err);
-  }
-};
-
-
   if (loading)
     return (
       <div className="loading-container">
@@ -687,13 +674,6 @@ body::before {
                       <span className="clock-icon">➡️</span>
                       Promote to <strong>{nextRank}</strong>
                     </div>
-                    <button
-                      onClick={refreshClanStatus}
-                      className="mt-3 px-4 py-2 bg-green-600 hover:bg-green-700 text-white font-medium rounded-lg transition"
-                    >
-                      Done
-                    </button>
-
                   </div>
                 );
               })}
