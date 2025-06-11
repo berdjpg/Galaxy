@@ -1,26 +1,29 @@
 import { createClient } from '@supabase/supabase-js';
 
-const supabase = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_SERVICE_ROLE_KEY);
+const supabase = createClient(
+  process.env.SUPABASE_URL,
+  process.env.SUPABASE_SERVICE_ROLE_KEY
+);
 
 export default async function rsnChangeHandler(req, res) {
   if (req.method !== 'PUT') {
     return res.status(405).json({ error: 'Method not allowed' });
   }
 
-  const { memberId, newName } = req.body;
+  const { oldName, newName } = req.body;
 
-  if (!memberId || !newName) {
-    return res.status(400).json({ error: 'memberId and newName are required' });
+  if (!oldName || !newName) {
+    return res.status(400).json({ error: 'oldName and newName are required' });
   }
 
   try {
-    // Update the 'name' (RSN) for the specified member
+    // Update the member's name based on the old name
     const { data, error } = await supabase
       .from('clan_members')
       .update({ name: newName })
-      .eq('id', memberId)
+      .ilike('name', oldName) // Case-insensitive match
       .select()
-      .single();
+      .single(); // Expecting only one match
 
     if (error) throw error;
 
