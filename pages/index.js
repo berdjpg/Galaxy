@@ -361,6 +361,10 @@ body::before {
   color: white;
 }
 
+.rank-avatar img {
+  height: 166%;
+}
+
 .eligible-badge {
   background: rgba(16, 185, 129, 0.1);
   color: #10b981;
