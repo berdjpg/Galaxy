@@ -48,18 +48,18 @@ const rankImportance = {
 };
 
 const rankColors = {
-  owner: 'linear-gradient(135deg, #a855f7, #ec4899)',
-  'deputy owner': 'linear-gradient(135deg, #a78bfa, #8b5cf6)',
-  overseer: 'linear-gradient(135deg, #3b82f6, #06b6d4)',
-  coordinator: 'linear-gradient(135deg, #10b981, #059669)',
-  organiser: 'linear-gradient(135deg, #f59e0b, #ea580c)',
-  admin: 'linear-gradient(135deg, #ef4444, #ec4899)',
-  general: 'linear-gradient(135deg, #6366f1, #8b5cf6)',
-  captain: 'linear-gradient(135deg, #60a5fa, #3b82f6)',
-  lieutenant: 'linear-gradient(135deg, #34d399, #10b981)',
+  owner: 'linear-gradient(135deg, #f5d76e, #f2c94c)',
+  'deputy owner': 'linear-gradient(135deg, #dcdcdc, #c0c0c0)',
+  overseer: 'linear-gradient(135deg, #cd7f32, #b87333)',
+  coordinator: 'linear-gradient(135deg, #e2c290, #d1a05f)',
+  organiser: 'linear-gradient(135deg, #b3d4fc, #79b8f3)',
+  admin: 'linear-gradient(135deg, #f87171, #ef4444)',
+  general: 'linear-gradient(135deg, #ffd700, #facc15)',
+  captain: 'linear-gradient(135deg, #dcdcdc, #a1a1aa)',
+  lieutenant: 'linear-gradient(135deg, #cd7f32, #a97142)',
   sergeant: 'linear-gradient(135deg, #fbbf24, #f59e0b)',
   corporal: 'linear-gradient(135deg, #9ca3af, #6b7280)',
-  recruit: 'linear-gradient(135deg, #d1d5db, #9ca3af)',
+  recruit: 'linear-gradient(135deg, #e5e7eb, #d1d5db)',
 };
 
 function getDaysInCurrentRank(memberName, currentRank, joinedAt) {
@@ -532,12 +532,16 @@ body::before {
 }
 
 .rank-badge {
-  padding: 0.25rem 0.75rem;
+  padding: 0.25rem 0.75rem 0.25rem 0.5rem;
+  gap: 6px;
   border-radius: 9999px;
   font-size: 0.875rem;
   font-weight: 500;
   color: white;
   text-transform: capitalize;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .status-eligible {
