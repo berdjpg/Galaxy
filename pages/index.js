@@ -1,7 +1,5 @@
 import { useEffect, useState, useMemo } from 'react';
 
-const CRON_SECRET = process.env.CRON_SECRET;
-
 function formatDate(timestamp) {
   if (!timestamp) return 'Unknown';
   const date = new Date(timestamp);
@@ -181,29 +179,18 @@ export default function Home() {
     const expectedNext = validPromotions[current];
     return expectedNext !== undefined;
   });
-  
-  const [isRefreshing, setIsRefreshing] = useState(false);
 
-const refreshClanStatus = async () => {
-  setIsRefreshing(true);
+  const refreshClanStatus = async () => {
   try {
     const res = await fetch('/api/clan-status', {
-      method: 'GET',
-      headers: {
-        'Authorization': `Bearer ${CRON_SECRET}`
-      }
+      method: 'POST', // or 'GET' if your endpoint expects GET
     });
-
-    if (!res.ok) throw new Error('Failed to refresh');
-    console.log('Refreshed');
+    if (!res.ok) throw new Error('Failed to refresh clan status');
+    console.log('Clan status refreshed');
   } catch (err) {
-    console.error(err);
-  } finally {
-    setIsRefreshing(false);
+    console.error('Error refreshing clan status:', err);
   }
 };
-
-
 
 
   if (loading)
