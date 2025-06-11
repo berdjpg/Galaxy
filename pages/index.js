@@ -1,5 +1,7 @@
 import { useEffect, useState, useMemo } from 'react';
 
+const CRON_SECRET = process.env.CRON_SECRET;
+
 function formatDate(timestamp) {
   if (!timestamp) return 'Unknown';
   const date = new Date(timestamp);
@@ -179,6 +181,30 @@ export default function Home() {
     const expectedNext = validPromotions[current];
     return expectedNext !== undefined;
   });
+  
+  const [isRefreshing, setIsRefreshing] = useState(false);
+
+const refreshClanStatus = async () => {
+  setIsRefreshing(true);
+  try {
+    const res = await fetch('/api/clan-status', {
+      method: 'GET',
+      headers: {
+        'Authorization': `Bearer ${CRON_SECRET}`
+      }
+    });
+
+    if (!res.ok) throw new Error('Failed to refresh');
+    console.log('Refreshed');
+  } catch (err) {
+    console.error(err);
+  } finally {
+    setIsRefreshing(false);
+  }
+};
+
+
+
 
   if (loading)
     return (
@@ -674,6 +700,13 @@ body::before {
                       <span className="clock-icon">➡️</span>
                       Promote to <strong>{nextRank}</strong>
                     </div>
+                    <button
+                      onClick={refreshClanStatus}
+                      className="mt-3 px-4 py-2 bg-green-600 hover:bg-green-700 text-white font-medium rounded-lg transition"
+                    >
+                      Done
+                    </button>
+
                   </div>
                 );
               })}
