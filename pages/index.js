@@ -47,6 +47,21 @@ const rankImportance = {
   recruit: -1,
 };
 
+const rankColors = {
+  owner: 'linear-gradient(135deg, #a855f7, #ec4899)',
+  'deputy owner': 'linear-gradient(135deg, #a78bfa, #8b5cf6)',
+  overseer: 'linear-gradient(135deg, #3b82f6, #06b6d4)',
+  coordinator: 'linear-gradient(135deg, #10b981, #059669)',
+  organiser: 'linear-gradient(135deg, #f59e0b, #ea580c)',
+  admin: 'linear-gradient(135deg, #ef4444, #ec4899)',
+  general: 'linear-gradient(135deg, #6366f1, #8b5cf6)',
+  captain: 'linear-gradient(135deg, #60a5fa, #3b82f6)',
+  lieutenant: 'linear-gradient(135deg, #34d399, #10b981)',
+  sergeant: 'linear-gradient(135deg, #fbbf24, #f59e0b)',
+  corporal: 'linear-gradient(135deg, #9ca3af, #6b7280)',
+  recruit: 'linear-gradient(135deg, #d1d5db, #9ca3af)',
+};
+
 function getDaysInCurrentRank(memberName, currentRank, joinedAt) {
   const joinDate = new Date(joinedAt);
   const now = new Date();
@@ -156,300 +171,582 @@ export default function Home() {
   if (loading)
     return (
       <div className="loading-container">
-        <p>Loading clan members...</p>
+        <div className="loading-content">
+          <div className="spinner"></div>
+          <p>Loading clan members...</p>
+        </div>
       </div>
     );
 
   if (!members.length)
     return (
       <div className="loading-container">
-        <p>No clan members found.</p>
+        <div className="loading-content">
+          <div className="empty-icon">👥</div>
+          <p>No clan members found.</p>
+        </div>
       </div>
     );
 
   return (
     <>
       <style>{`
-* {
-  box-sizing: border-box;
-}
+        * {
+          box-sizing: border-box;
+        }
 
-html, body, #__next {
-  margin: 0;
-  padding: 0;
-  height: 100%;
-  background-color: #0C0D0D;
-  color: #E0E0E0;
-  font-family: 'Inter', sans-serif;
-  -webkit-font-smoothing: antialiased;
-}
+        html, body, #__next {
+          margin: 0;
+          padding: 0;
+          height: 100%;
+          background: linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #0f172a 100%);
+          color: #e2e8f0;
+          font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+          -webkit-font-smoothing: antialiased;
+          -moz-osx-font-smoothing: grayscale;
+        }
 
-.container {
-  max-width: 900px;
-  margin: 40px auto;
-  padding: 24px;
-  background-color: #121212;
-  border-radius: 12px;
-  display: flex;
-  flex-direction: column;
-  min-height: 100vh;
-  box-shadow: 0 0 12px rgba(0, 0, 0, 0.3);
-}
+        /* Animated background blobs */
+        body::before {
+          content: '';
+          position: fixed;
+          top: -50%;
+          right: -50%;
+          width: 200%;
+          height: 200%;
+          background: radial-gradient(circle at 25% 25%, rgba(139, 92, 246, 0.1) 0%, transparent 50%),
+                      radial-gradient(circle at 75% 75%, rgba(6, 182, 212, 0.1) 0%, transparent 50%),
+                      radial-gradient(circle at 50% 50%, rgba(236, 72, 153, 0.05) 0%, transparent 50%);
+          animation: blob 20s ease-in-out infinite;
+          pointer-events: none;
+          z-index: -1;
+        }
 
-h1 {
-  font-size: 2rem;
-  font-weight: 600;
-  margin-bottom: 24px;
-  color: #FC6F53;
-}
+        @keyframes blob {
+          0%, 100% { transform: translate(0, 0) rotate(0deg); }
+          33% { transform: translate(30px, -30px) rotate(120deg); }
+          66% { transform: translate(-20px, 20px) rotate(240deg); }
+        }
 
-/* Controls */
-.controls {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 12px;
-  align-items: center;
-  margin-bottom: 24px;
-}
+        .container {
+          max-width: 1200px;
+          margin: 0 auto;
+          padding: 2rem;
+          min-height: 100vh;
+        }
 
-.controls label {
-  font-size: 0.9rem;
-  font-weight: 500;
-}
+        /* Header */
+        .header {
+          text-align: center;
+          margin-bottom: 3rem;
+        }
 
-.controls input[type="text"] {
-  padding: 10px 14px;
-  font-size: 1rem;
-  border-radius: 8px;
-  border: 1px solid #2A2A2A;
-  background-color: #1A1A1A;
-  color: #FFF;
-  transition: all 0.2s ease-in-out;
-}
+        .header-title {
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          gap: 1rem;
+          margin-bottom: 0.5rem;
+        }
 
-.controls input[type="text"]:focus {
-  outline: none;
-  border-color: #FC6F53;
-  background-color: #1E1E1E;
-}
+        .crown-icon {
+          font-size: 2.5rem;
+        }
 
-.controls button {
-  padding: 10px 16px;
-  border-radius: 8px;
-  border: none;
-  background-color: #1A1A1A;
-  color: #CCCCCC;
-  font-size: 0.9rem;
-  font-weight: 500;
-  cursor: pointer;
-  transition: background 0.2s ease, color 0.2s ease;
-}
+        .main-title {
+          font-size: 3rem;
+          font-weight: 700;
+          background: linear-gradient(135deg, #06b6d4, #8b5cf6);
+          background-clip: text;
+          -webkit-background-clip: text;
+          -webkit-text-fill-color: transparent;
+          margin: 0;
+        }
 
-.controls button:hover {
-  background-color: #2A2A2A;
-  color: #FC6F53;
-}
+        .subtitle {
+          color: #94a3b8;
+          font-size: 1.1rem;
+          font-weight: 400;
+        }
 
-.controls button.active {
-  background-color: #FC6F53;
-  color: #0C0D0D;
-}
+        /* Promotion Cards */
+        .promotion-section {
+          margin-bottom: 3rem;
+        }
 
-/* Promo Cards */
-.promo-cards-container {
-  display: flex;
-  gap: 16px;
-  overflow-x: auto;
-  padding-bottom: 4px;
-  margin-bottom: 32px;
-}
+        .promotion-header {
+          display: flex;
+          align-items: center;
+          gap: 0.75rem;
+          margin-bottom: 1.5rem;
+        }
 
-.promo-card {
-  min-width: 160px;
-  background-color: #1A1A1A;
-  border-radius: 10px;
-  padding: 16px;
-  color: #FFFFFF;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
-  transition: transform 0.2s ease;
-}
+        .promotion-header h2 {
+          font-size: 1.75rem;
+          font-weight: 600;
+          color: #fff;
+          margin: 0;
+        }
 
-.promo-card:hover {
-  transform: translateY(-2px);
-}
+        .trend-icon {
+          color: #10b981;
+          font-size: 1.5rem;
+        }
 
-.promo-card .name {
-  font-size: 1.1rem;
-  font-weight: 600;
-  margin-bottom: 4px;
-  color: #FC6F53;
-}
+        .promo-cards-grid {
+          display: grid;
+          grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+          gap: 1.5rem;
+        }
 
-.promo-card .rank,
-.promo-card .days-in-rank {
-  font-size: 0.85rem;
-  color: #AAAAAA;
-  margin-bottom: 4px;
-}
+        .promo-card {
+          background: rgba(30, 41, 59, 0.5);
+          backdrop-filter: blur(10px);
+          border: 1px solid rgba(148, 163, 184, 0.1);
+          border-radius: 1rem;
+          padding: 1.5rem;
+          transition: all 0.3s ease;
+          position: relative;
+          overflow: hidden;
+        }
 
-.promo-card .promo-label {
-  background-color: #FC6F53;
-  color: #0C0D0D;
-  padding: 4px 10px;
-  border-radius: 999px;
-  font-size: 0.75rem;
-  font-weight: 600;
-}
+        .promo-card::before {
+          content: '';
+          position: absolute;
+          top: 0;
+          left: 0;
+          right: 0;
+          height: 3px;
+          background: linear-gradient(90deg, #10b981, #059669);
+        }
 
-/* Table */
-table {
-  width: 100%;
-  border-collapse: collapse;
-  background-color: #121212;
-}
+        .promo-card:hover {
+          transform: translateY(-4px);
+          box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+          border-color: rgba(16, 185, 129, 0.3);
+        }
 
-thead tr {
-  background-color: #1A1A1A;
-}
+        .promo-card-header {
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          margin-bottom: 1rem;
+        }
 
-thead th {
-  padding: 14px 12px;
-  font-size: 0.95rem;
-  font-weight: 600;
-  color: #FC6F53;
-  text-align: left;
-  cursor: pointer;
-  transition: background 0.2s ease;
-}
+        .rank-avatar {
+          width: 3rem;
+          height: 3rem;
+          border-radius: 0.75rem;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          font-size: 1.25rem;
+          font-weight: 600;
+          color: white;
+        }
 
-thead th:hover {
-  background-color: #222;
-}
+        .eligible-badge {
+          background: rgba(16, 185, 129, 0.2);
+          color: #10b981;
+          padding: 0.25rem 0.75rem;
+          border-radius: 9999px;
+          font-size: 0.75rem;
+          font-weight: 500;
+          border: 1px solid rgba(16, 185, 129, 0.3);
+        }
 
-tbody tr {
-  border-top: 1px solid #2A2A2A;
-  transition: background 0.2s ease;
-}
+        .member-name {
+          font-size: 1.25rem;
+          font-weight: 600;
+          color: #fff;
+          margin-bottom: 0.5rem;
+          transition: color 0.3s ease;
+        }
 
-tbody tr:hover {
-  background-color: #1E1E1E;
-}
+        .promo-card:hover .member-name {
+          color: #06b6d4;
+        }
 
-tbody td {
-  padding: 12px;
-  font-size: 0.9rem;
-}
+        .member-rank {
+          color: #94a3b8;
+          margin-bottom: 0.75rem;
+          text-transform: capitalize;
+        }
 
-/* Loading */
-.loading-container {
-  display: flex;
-  height: 100vh;
-  justify-content: center;
-  align-items: center;
-  font-size: 1.2rem;
-  color: #999;
-}
+        .days-in-rank {
+          display: flex;
+          align-items: center;
+          gap: 0.5rem;
+          color: #64748b;
+          font-size: 0.875rem;
+        }
 
+        .clock-icon {
+          font-size: 1rem;
+        }
+
+        /* Search */
+        .search-section {
+          margin-bottom: 2rem;
+        }
+
+        .search-container {
+          position: relative;
+          max-width: 400px;
+        }
+
+        .search-icon {
+          position: absolute;
+          left: 1rem;
+          top: 50%;
+          transform: translateY(-50%);
+          color: #64748b;
+          font-size: 1.25rem;
+        }
+
+        .search-input {
+          width: 100%;
+          padding: 0.75rem 1rem 0.75rem 3rem;
+          background: rgba(30, 41, 59, 0.5);
+          backdrop-filter: blur(10px);
+          border: 1px solid rgba(148, 163, 184, 0.2);
+          border-radius: 0.75rem;
+          color: #fff;
+          font-size: 1rem;
+          transition: all 0.3s ease;
+        }
+
+        .search-input::placeholder {
+          color: #64748b;
+        }
+
+        .search-input:focus {
+          outline: none;
+          border-color: #06b6d4;
+          box-shadow: 0 0 0 3px rgba(6, 182, 212, 0.1);
+        }
+
+        /* Table */
+        .table-container {
+          background: rgba(30, 41, 59, 0.3);
+          backdrop-filter: blur(10px);
+          border: 1px solid rgba(148, 163, 184, 0.1);
+          border-radius: 1rem;
+          overflow: hidden;
+        }
+
+        .table {
+          width: 100%;
+          border-collapse: collapse;
+        }
+
+        .table-header {
+          background: rgba(30, 41, 59, 0.7);
+          border-bottom: 1px solid rgba(148, 163, 184, 0.2);
+        }
+
+        .table-header th {
+          padding: 1rem 1.5rem;
+          text-align: left;
+          font-weight: 600;
+          color: #e2e8f0;
+          cursor: pointer;
+          transition: all 0.3s ease;
+          position: relative;
+          user-select: none;
+        }
+
+        .table-header th:hover {
+          background: rgba(148, 163, 184, 0.1);
+          color: #06b6d4;
+        }
+
+        .sort-indicator {
+          margin-left: 0.5rem;
+          opacity: 0;
+          transition: opacity 0.3s ease;
+        }
+
+        .table-header th:hover .sort-indicator {
+          opacity: 1;
+        }
+
+        .table-header th.active .sort-indicator {
+          opacity: 1;
+          color: #06b6d4;
+        }
+
+        .table-body tr {
+          border-bottom: 1px solid rgba(148, 163, 184, 0.1);
+          transition: background-color 0.3s ease;
+        }
+
+        .table-body tr:hover {
+          background: rgba(148, 163, 184, 0.05);
+        }
+
+        .table-body td {
+          padding: 1rem 1.5rem;
+          color: #e2e8f0;
+        }
+
+        .member-cell {
+          display: flex;
+          align-items: center;
+          gap: 0.75rem;
+        }
+
+        .member-avatar {
+          width: 2rem;
+          height: 2rem;
+          border-radius: 0.5rem;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          font-size: 0.875rem;
+          font-weight: 600;
+          color: white;
+        }
+
+        .member-name-cell {
+          font-weight: 500;
+        }
+
+        .rank-badge {
+          padding: 0.25rem 0.75rem;
+          border-radius: 9999px;
+          font-size: 0.875rem;
+          font-weight: 500;
+          color: white;
+          text-transform: capitalize;
+        }
+
+        .status-eligible {
+          display: inline-flex;
+          align-items: center;
+          gap: 0.5rem;
+          background: rgba(16, 185, 129, 0.2);
+          color: #10b981;
+          padding: 0.25rem 0.75rem;
+          border-radius: 9999px;
+          font-size: 0.875rem;
+          font-weight: 500;
+          border: 1px solid rgba(16, 185, 129, 0.3);
+        }
+
+        .status-dot {
+          width: 0.5rem;
+          height: 0.5rem;
+          background: #10b981;
+          border-radius: 50%;
+          animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+          0%, 100% { opacity: 1; }
+          50% { opacity: 0.5; }
+        }
+
+        .status-inactive {
+          color: #64748b;
+        }
+
+        /* Loading */
+        .loading-container {
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          min-height: 100vh;
+        }
+
+        .loading-content {
+          text-align: center;
+        }
+
+        .spinner {
+          width: 3rem;
+          height: 3rem;
+          border: 3px solid rgba(6, 182, 212, 0.3);
+          border-top: 3px solid #06b6d4;
+          border-radius: 50%;
+          animation: spin 1s linear infinite;
+          margin: 0 auto 1rem;
+        }
+
+        @keyframes spin {
+          0% { transform: rotate(0deg); }
+          100% { transform: rotate(360deg); }
+        }
+
+        .empty-icon {
+          font-size: 4rem;
+          margin-bottom: 1rem;
+        }
+
+        .loading-content p {
+          color: #94a3b8;
+          font-size: 1.1rem;
+        }
+
+        /* Footer */
+        .footer {
+          margin-top: 3rem;
+          text-center;
+          color: #64748b;
+          font-size: 0.875rem;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+          .container {
+            padding: 1rem;
+          }
+
+          .main-title {
+            font-size: 2rem;
+          }
+
+          .promo-cards-grid {
+            grid-template-columns: 1fr;
+          }
+
+          .table-container {
+            overflow-x: auto;
+          }
+
+          .table {
+            min-width: 600px;
+          }
+        }
       `}</style>
 
-      <div className="container" role="main" aria-label="Clan Members List">
-        <h1>Clan Members - Remenant</h1>
+      <div className="container">
+        {/* Header */}
+        <div className="header">
+          <div className="header-title">
+            <span className="crown-icon">👑</span>
+            <h1 className="main-title">Remenant Clan</h1>
+          </div>
+          <p className="subtitle">Member management dashboard</p>
+        </div>
 
+        {/* Promotion Cards */}
         {readyForPromotion.length > 0 && (
-          <div className="promo-cards-container" aria-label="Members Ready for Promotion">
-            {readyForPromotion.map((m) => {
-              const days = getDaysInCurrentRank(m.name, m.rank, m.joined);
-              return (
-                <div
-                  key={m.name}
-                  className="promo-card"
-                  title={`${m.name} — ${m.rank} (${days} days in rank)`}
-                >
-                  <div className="name">{m.name}</div>
-                  <div className="rank">{m.rank}</div>
-                  <div className="days-in-rank">{days} day{days !== 1 ? 's' : ''} in rank</div>
-                  <div className="promo-label">Ready for Promotion</div>
-                </div>
-              );
-            })}
+          <div className="promotion-section">
+            <div className="promotion-header">
+              <span className="trend-icon">📈</span>
+              <h2>Ready for Promotion</h2>
+            </div>
+            <div className="promo-cards-grid">
+              {readyForPromotion.map((m) => {
+                const days = getDaysInCurrentRank(m.name, m.rank, m.joined);
+                const rankColor = rankColors[m.rank.toLowerCase()] || rankColors.recruit;
+                return (
+                  <div key={m.name} className="promo-card">
+                    <div className="promo-card-header">
+                      <div className="rank-avatar" style={{ background: rankColor }}>
+                        {m.name.charAt(0).toUpperCase()}
+                      </div>
+                      <div className="eligible-badge">Eligible</div>
+                    </div>
+                    <h3 className="member-name">{m.name}</h3>
+                    <p className="member-rank">{m.rank}</p>
+                    <div className="days-in-rank">
+                      <span className="clock-icon">🕐</span>
+                      {days} day{days !== 1 ? 's' : ''} in rank
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
           </div>
         )}
 
-        <div className="controls">
-          <label htmlFor="filter">Filter by name:</label>
-          <input
-            id="filter"
-            type="text"
-            placeholder="Search members..."
-            value={filterText}
-            onChange={(e) => setFilterText(e.target.value)}
-            aria-label="Filter clan members by name"
-          />
+        {/* Search */}
+        <div className="search-section">
+          <div className="search-container">
+            <span className="search-icon">🔍</span>
+            <input
+              type="text"
+              placeholder="Search members..."
+              value={filterText}
+              onChange={(e) => setFilterText(e.target.value)}
+              className="search-input"
+            />
+          </div>
         </div>
 
-        <table role="table" aria-label="Clan members table">
-          <thead>
-            <tr>
-              <th
-                scope="col"
-                onClick={() => handleSort('name')}
-                tabIndex={0}
-                role="button"
-                aria-sort={
-                  sortKey === 'name' ? (sortAsc ? 'ascending' : 'descending') : 'none'
-                }
-              >
-                Name {sortKey === 'name' ? (sortAsc ? '▲' : '▼') : ''}
-              </th>
-              <th
-                scope="col"
-                onClick={() => handleSort('importance')}
-                tabIndex={0}
-                role="button"
-                aria-sort={
-                  sortKey === 'importance' ? (sortAsc ? 'ascending' : 'descending') : 'none'
-                }
-              >
-                Rank {sortKey === 'importance' ? (sortAsc ? '▲' : '▼') : ''}
-              </th>
-              <th
-                scope="col"
-                onClick={() => handleSort('joined')}
-                tabIndex={0}
-                role="button"
-                aria-sort={
-                  sortKey === 'joined' ? (sortAsc ? 'ascending' : 'descending') : 'none'
-                }
-              >
-                Joined {sortKey === 'joined' ? (sortAsc ? '▲' : '▼') : ''}
-              </th>
-              <th scope="col">Membership Duration</th>
-              <th scope="col">Promotion Eligibility</th>
-            </tr>
-          </thead>
-          <tbody>
-            {filteredSortedMembers.map((member) => (
-              <tr key={member.name}>
-                <td>{member.name}</td>
-                <td>{member.rank}</td>
-                <td>{formatDate(member.joined)}</td>
-                <td>{getMembershipDuration(member.joined)}</td>
-                <td>
-                  {(() => {
-                    const days = getDaysInCurrentRank(member.name, member.rank, member.joined);
-                    return days !== null && isEligibleForPromotion(member.rank, days)
-                      ? 'Eligible'
-                      : '-';
-                  })()}
-                </td>
+        {/* Table */}
+        <div className="table-container">
+          <table className="table">
+            <thead className="table-header">
+              <tr>
+                <th onClick={() => handleSort('name')} className={sortKey === 'name' ? 'active' : ''}>
+                  Name
+                  <span className="sort-indicator">
+                    {sortKey === 'name' ? (sortAsc ? '↑' : '↓') : '↕'}
+                  </span>
+                </th>
+                <th onClick={() => handleSort('importance')} className={sortKey === 'importance' ? 'active' : ''}>
+                  Rank
+                  <span className="sort-indicator">
+                    {sortKey === 'importance' ? (sortAsc ? '↑' : '↓') : '↕'}
+                  </span>
+                </th>
+                <th onClick={() => handleSort('joined')} className={sortKey === 'joined' ? 'active' : ''}>
+                  📅 Joined
+                  <span className="sort-indicator">
+                    {sortKey === 'joined' ? (sortAsc ? '↑' : '↓') : '↕'}
+                  </span>
+                </th>
+                <th>Duration</th>
+                <th>Status</th>
               </tr>
-            ))}
-          </tbody>
-        </table>
+            </thead>
+            <tbody className="table-body">
+              {filteredSortedMembers.map((member, index) => {
+                const days = getDaysInCurrentRank(member.name, member.rank, member.joined);
+                const isEligible = days !== null && isEligibleForPromotion(member.rank, days);
+                const rankColor = rankColors[member.rank.toLowerCase()] || rankColors.recruit;
+                
+                return (
+                  <tr key={member.name}>
+                    <td>
+                      <div className="member-cell">
+                        <div className="member-avatar" style={{ background: rankColor }}>
+                          {member.name.charAt(0).toUpperCase()}
+                        </div>
+                        <span className="member-name-cell">{member.name}</span>
+                      </div>
+                    </td>
+                    <td>
+                      <span className="rank-badge" style={{ background: rankColor }}>
+                        {member.rank}
+                      </span>
+                    </td>
+                    <td>{formatDate(member.joined)}</td>
+                    <td>{getMembershipDuration(member.joined)}</td>
+                    <td>
+                      {isEligible ? (
+                        <span className="status-eligible">
+                          <span className="status-dot"></span>
+                          Eligible
+                        </span>
+                      ) : (
+                        <span className="status-inactive">—</span>
+                      )}
+                    </td>
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
+        </div>
+
+        {/* Footer */}
+        <div className="footer">
+          <p>Showing {filteredSortedMembers.length} of {members.length} members</p>
+        </div>
       </div>
     </>
   );
