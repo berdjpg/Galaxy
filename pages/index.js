@@ -75,7 +75,8 @@ function isEligibleForPromotion(currentRank, daysInRank) {
 }
 
 export default function Home() {
-  const [members, setMembers] = useState('');
+  const [members, setMembers] = useState([]);
+  const [loading, setLoading] = useState(true);
 
   // Default sorting: by importance DESC
   const [sortKey, setSortKey] = useState('importance');
@@ -85,7 +86,6 @@ export default function Home() {
   useEffect(() => {
     async function fetchMembers() {
       try {
-        // Simulating API call - in real app this would fetch from /api/members
         const res = await fetch('/api/members');
         const data = await res.json();
         setMembers(data);
@@ -116,22 +116,16 @@ export default function Home() {
       } else if (sortKey === 'joined') {
         valA = new Date(a.joined);
         valB = new Date(b.joined);
-      } else if (sortKey === 'duration') {
-        const now = new Date();
-        valA = a.joined ? now - new Date(a.joined) : -Infinity;
-        valB = b.joined ? now - new Date(b.joined) : -Infinity;
-      } else if (sortKey === 'status') {
-        const daysA = getDaysInCurrentRank(a.name, a.rank, a.joined);
-        const daysB = getDaysInCurrentRank(b.name, b.rank, b.joined);
-        const eligibleA = daysA !== null && isEligibleForPromotion(a.rank, daysA);
-        const eligibleB = daysB !== null && isEligibleForPromotion(b.rank, daysB);
-        
-        // Eligible members come first (1), non-eligible second (0)
-        valA = eligibleA ? 1 : 0;
-        valB = eligibleB ? 1 : 0;
       } else {
         valA = a[sortKey];
         valB = b[sortKey];
+      }
+
+      if (sortKey === 'membershipDuration') {
+        const now = new Date();
+        const diffA = !valA ? -Infinity : now - new Date(valA);
+        const diffB = !valB ? -Infinity : now - new Date(valB);
+        return sortAsc ? diffA - diffB : diffB - diffA;
       }
 
       if (typeof valA === 'string') valA = valA.toLowerCase();
@@ -169,8 +163,8 @@ export default function Home() {
       setSortAsc(!sortAsc);
     } else {
       setSortKey(key);
-      // Default sort direction: descending for importance/duration/status, ascending for others
-      setSortAsc(['importance', 'duration', 'status'].includes(key) ? false : true);
+      // Default sort direction: descending for importance, ascending for others
+      setSortAsc(key === 'importance' ? false : true);
     }
   };
 
@@ -705,18 +699,8 @@ export default function Home() {
                     {sortKey === 'joined' ? (sortAsc ? '↑' : '↓') : '↕'}
                   </span>
                 </th>
-                <th onClick={() => handleSort('duration')} className={sortKey === 'duration' ? 'active' : ''}>
-                  Duration
-                  <span className="sort-indicator">
-                    {sortKey === 'duration' ? (sortAsc ? '↑' : '↓') : '↕'}
-                  </span>
-                </th>
-                <th onClick={() => handleSort('status')} className={sortKey === 'status' ? 'active' : ''}>
-                  Status
-                  <span className="sort-indicator">
-                    {sortKey === 'status' ? (sortAsc ? '↑' : '↓') : '↕'}
-                  </span>
-                </th>
+                <th>Duration</th>
+                <th>Status</th>
               </tr>
             </thead>
             <tbody className="table-body">
