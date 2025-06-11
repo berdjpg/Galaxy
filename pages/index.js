@@ -168,6 +168,18 @@ export default function Home() {
     }
   };
 
+  const validPromotions = {
+  recruit: 'lieutenant',
+  lieutenant: 'captain',
+  };
+
+  // Filter only those with valid promotions
+  const filteredPromotions = readyForPromotion.filter(member => {
+    const current = member.rank.toLowerCase();
+    const expectedNext = validPromotions[current];
+    return expectedNext !== undefined;
+  });
+
   if (loading)
     return (
       <div className="loading-container">
@@ -630,35 +642,23 @@ body::before {
         </div>
 
         {/* Promotion Cards */}
-        {readyForPromotion.length > 0 && (
+        {filteredPromotions.length > 0 && (
           <div className="promotion-section">
             <div className="promotion-header">
               <h2>Action needed</h2>
             </div>
             <div className="promo-cards-grid">
-              {readyForPromotion.map(member => {
+              {filteredPromotions.map(member => {
+                const current = member.rank.toLowerCase();
+                const nextRank = validPromotions[current];
                 const days = getDaysInCurrentRank(member.name, member.rank, member.joined);
-                const currentRankImportance = rankImportance[member.rank.toLowerCase()];
-                const nextRank = Object.entries(rankImportance)
-                  .find(([, imp]) => imp === currentRankImportance + 1)?.[0];
-
-                // Only allow Recruit → Lieutenant and Lieutenant → Captain
-                const validPromotions = {
-                  recruit: 'lieutenant',
-                  lieutenant: 'captain'
-                };
-
-                const normalizedCurrent = member.rank.toLowerCase();
-                const normalizedNext = nextRank?.toLowerCase();
-
-                if (validPromotions[normalizedCurrent] !== normalizedNext) return null;
 
                 return (
                   <div key={member.name} className="promo-card">
                     <div className="promo-card-header">
                       <div
                         className="rank-avatar"
-                        style={{ background: rankColors[normalizedCurrent] }}
+                        style={{ background: rankColors[current] }}
                       >
                         {member.rank[0].toUpperCase()}
                       </div>
