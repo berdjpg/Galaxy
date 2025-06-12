@@ -1,20 +1,21 @@
 import { useEffect, useState, useMemo } from 'react';
 
-function formatDate(timestamp) {
+function formatDate(timestamp, full = false) {
   if (!timestamp) return 'Unknown';
   const date = new Date(timestamp);
   if (isNaN(date)) return 'Invalid Date';
 
-  // European format: DD/MM/YYYY HH:mm:ss (24-hour)
   const day = String(date.getDate()).padStart(2, '0');
-  const month = String(date.getMonth() + 1).padStart(2, '0'); // Months 0-11
+  const month = String(date.getMonth() + 1).padStart(2, '0');
   const year = date.getFullYear();
 
-  const hours = String(date.getHours()).padStart(2, '0');
-  const minutes = String(date.getMinutes()).padStart(2, '0');
-  const seconds = String(date.getSeconds()).padStart(2, '0');
-
-  return `${day}/${month}/${year}`;
+  if (full) {
+    const hours = String(date.getHours()).padStart(2, '0');
+    const minutes = String(date.getMinutes()).padStart(2, '0');
+    return `${day}/${month}/${year} ${hours}:${minutes}`;
+  } else {
+    return `${day}/${month}/${year}`;
+  }
 }
 
 const promotionTimes = {
@@ -793,7 +794,7 @@ body::before {
         <div className="footer">
           <p>Showing {filteredSortedMembers.length} of {members.length} members</p>
           <p>Milk men / Sani btw</p>
-          <p>Last updated: {formatDate(latestUpdate)}</p>
+          <p>Last updated: {formatDate(latestUpdate, true)}</p>
         </div>
       </div>
     </>
