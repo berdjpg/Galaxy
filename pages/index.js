@@ -140,13 +140,18 @@ export default function Home() {
     return filtered;
   }, [members, filterText, sortKey, sortAsc]);
 
-  const latestUpdate = useMemo(() => {
-    if (!members.length) return null;
-    const timestamps = members
-      .map(m => new Date(m.updatedAt || m.joined)) // assuming 'updatedAt' or fallback to 'joined'
-      .filter(d => !isNaN(d));
-    return timestamps.length ? new Date(Math.max(...timestamps)) : null;
-  }, [members]);
+const [lastUpdate, setLastUpdate] = useState<Date | null>(null);
+
+useEffect(() => {
+  const fetchData = async () => {
+    const res = await fetch('/api/metadata');
+    const json = await res.json();
+    if (json?.last_clan_update) {
+      setLastUpdate(new Date(json.last_clan_update));
+    }
+  };
+  fetchData();
+}, []);
 
 
   const getMembershipDuration = (joined) => {
@@ -794,7 +799,7 @@ body::before {
         <div className="footer">
           <p>Showing {filteredSortedMembers.length} of {members.length} members</p>
           <p>Milk men / Sani btw</p>
-          <p>Last updated: {formatDate(latestUpdate, true)}</p>
+          <p>Last updated: {lastUpdate ? formatDate(lastUpdate, true) : '...'}</p>
         </div>
       </div>
     </>
