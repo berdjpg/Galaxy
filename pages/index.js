@@ -139,6 +139,15 @@ export default function Home() {
     return filtered;
   }, [members, filterText, sortKey, sortAsc]);
 
+  const latestUpdate = useMemo(() => {
+    if (!members.length) return null;
+    const timestamps = members
+      .map(m => new Date(m.updatedAt || m.joined)) // assuming 'updatedAt' or fallback to 'joined'
+      .filter(d => !isNaN(d));
+    return timestamps.length ? new Date(Math.max(...timestamps)) : null;
+  }, [members]);
+
+
   const getMembershipDuration = (joined) => {
     const joinDate = new Date(joined);
     if (isNaN(joinDate)) return 'Unknown';
@@ -784,6 +793,7 @@ body::before {
         <div className="footer">
           <p>Showing {filteredSortedMembers.length} of {members.length} members</p>
           <p>Milk men / Sani btw</p>
+          <p>Last updated: {formatDate(latestUpdate)}</p>
         </div>
       </div>
     </>

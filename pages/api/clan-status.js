@@ -138,9 +138,19 @@ export default async function handler(req, res) {
       }
     }
 
+    // ✅ Save last update timestamp
+    const { error: metaError } = await supabase
+      .from('metadata')
+      .upsert({ key: 'last_clan_update', value: now });
+
+    if (metaError) {
+      console.error('Failed to update metadata:', metaError);
+    }
+
     return res.status(200).json({
       changes,
       totalMembers: members.length,
+      lastUpdate: now,
     });
   } catch (err) {
     console.error('Unexpected error:', err);
