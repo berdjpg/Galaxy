@@ -140,7 +140,7 @@ export default function Home() {
     return filtered;
   }, [members, filterText, sortKey, sortAsc]);
 
-const [lastUpdate, setLastUpdate] = useState<Date | null>(null);
+const [lastUpdate, setLastUpdate] = useState(null);
 
 useEffect(() => {
   const fetchData = async () => {
