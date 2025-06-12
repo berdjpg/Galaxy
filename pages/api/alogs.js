@@ -1,7 +1,4 @@
-// /api/fetch-adventure-logs.ts
-
 import { createClient } from '@supabase/supabase-js';
-import iconv from 'iconv-lite';
 
 const SUPABASE_URL = process.env.SUPABASE_URL;
 const SUPABASE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY;
