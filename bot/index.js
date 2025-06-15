@@ -31,6 +31,9 @@ const client = new Client({ intents: [GatewayIntentBits.Guilds] });
 
 const commands = [
   new SlashCommandBuilder()
+    .setName('ping')
+    .setDescription('Check if the bot is online'),
+  new SlashCommandBuilder()
     .setName('member')
     .setDescription('Get clan member stats')
     .addStringOption(opt => opt.setName('name').setDescription('RuneScape username').setRequired(true)),
@@ -59,47 +62,49 @@ client.on('ready', () => {
     client.user.setActivity('you', { type: ActivityType.Watching });
 
     // ✅ Daily promotions message at 12:00 PM Amsterdam time
-  cron.schedule('37 14 * * *', async () => {
-    try {
-      const channel = await client.channels.fetch('1372362491522322452');
-      const res = await fetch(`${API_BASE}/members`);
-      const data = await res.json();
+    cron.schedule('0 12 * * *', async () => {
+      try {
+        const channel = await client.channels.fetch('1372362491522322452');
+        const res = await fetch(`${API_BASE}/members`);
+        const data = await res.json();
 
-      const eligibleList = data
-        .map(m => ({
-          ...m,
-          days: daysInRank(m.joined),
-          nextRank: validPromotions[m.rank.toLowerCase()] ?? null
-        }))
-        .filter(m => m.nextRank && m.days >= (promotionTimes[m.rank.toLowerCase()] || Infinity));
+        const eligibleList = data
+          .map(m => ({
+            ...m,
+            days: daysInRank(m.joined),
+            nextRank: validPromotions[m.rank.toLowerCase()] ?? null
+          }))
+          .filter(m => m.nextRank && m.days >= (promotionTimes[m.rank.toLowerCase()] || Infinity));
 
-      if (eligibleList.length === 0) {
-        return;
+        if (eligibleList.length === 0) {
+          return;
+        }
+
+        const embed = new EmbedBuilder()
+          .setTitle('Promotion needed')
+          .setColor('Pink')
+          .setDescription(
+            eligibleList
+              .sort((a, b) => b.days - a.days)
+              .map(m => `• **${m.name}** — ${m.rank} (${m.days} days) → **${m.nextRank}**`)
+              .join('\n')
+          );
+
+        await channel.send({ embeds: [embed] });
+        console.log('✅ Sent daily promotion message.');
+
+      } catch (err) {
+        console.error('❌ Failed to send daily promotions message:', err);
       }
-
-      const embed = new EmbedBuilder()
-        .setTitle('📢 Daily Promotion Report')
-        .setColor('Blue')
-        .setDescription(
-          eligibleList
-            .sort((a, b) => b.days - a.days)
-            .map(m => `• **${m.name}** — ${m.rank} (${m.days} days) → **${m.nextRank}**`)
-            .join('\n')
-        );
-
-      await channel.send({ embeds: [embed] });
-      console.log('✅ Sent daily promotion message.');
-
-    } catch (err) {
-      console.error('❌ Failed to send daily promotions message:', err);
-    }
-  }, {
-    timezone: 'Europe/Amsterdam' // ✅ Run at NL time midday
-  });
+    });
 });
 
 client.on('interactionCreate', async interaction => {
   if (!interaction.isChatInputCommand()) return;
+
+  if (interaction.commandName === 'ping') {
+    await interaction.reply('Pong! 🏓');
+  }
 
   if (interaction.commandName === 'member') {
     const name = interaction.options.getString('name');
