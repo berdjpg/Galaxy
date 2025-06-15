@@ -74,7 +74,6 @@ client.on('ready', () => {
         .filter(m => m.nextRank && m.days >= (promotionTimes[m.rank.toLowerCase()] || Infinity));
 
       if (eligibleList.length === 0) {
-        await channel.send('👥 No one is currently eligible for promotion today.');
         return;
       }
 
