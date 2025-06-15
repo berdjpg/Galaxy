@@ -1,7 +1,19 @@
+const express = require('express');
+const app = express();
+const port = process.env.PORT || 3000;
+
+app.get('/', (_, res) => res.send('Bot is running'));
+
+app.listen(port, () => console.log(`Listening on port ${port}`));
+
+
 require('dotenv').config();
 console.log('DISCORD_TOKEN starts with:', process.env.DISCORD_TOKEN?.slice(0, 5));
 const { Client, GatewayIntentBits, REST, Routes, SlashCommandBuilder, EmbedBuilder, PresenceUpdateStatus } = require('discord.js');
 const { fetch } = require('undici');
+
+// Your bot code here (e.g., Discord client login)
+
 
 const API_BASE = process.env.CLAN_API_BASE; // https://v0‑new‑project‑ptwxymzx9ew.vercel.app/api
 
