@@ -59,7 +59,7 @@ client.on('ready', () => {
     client.user.setActivity('you', { type: ActivityType.Watching });
 
     // ✅ Daily promotions message at 12:00 PM Amsterdam time
-  cron.schedule('35 14 * * *', async () => {
+  cron.schedule('37 14 * * *', async () => {
     try {
       const channel = await client.channels.fetch('1372362491522322452');
       const res = await fetch(`${API_BASE}/members`);
