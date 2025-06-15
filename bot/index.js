@@ -9,7 +9,7 @@ app.listen(port, () => console.log(`Listening on port ${port}`));
 
 require('dotenv').config();
 console.log('DISCORD_TOKEN starts with:', process.env.DISCORD_TOKEN?.slice(0, 5));
-const { Client, GatewayIntentBits, REST, Routes, SlashCommandBuilder, EmbedBuilder, PresenceUpdateStatus } = require('discord.js');
+const { Client, GatewayIntentBits, REST, Routes, SlashCommandBuilder, EmbedBuilder, ActivityType } = require('discord.js');
 const { fetch } = require('undici');
 
 // Your bot code here (e.g., Discord client login)
