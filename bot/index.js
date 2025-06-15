@@ -55,7 +55,7 @@ const rest = new REST({ version: '10' }).setToken(process.env.DISCORD_TOKEN);
 
 client.on('ready', () => {
     console.log(`✅ Logged in as ${client.user.tag}`);
-    client.user.setPresence({ status: PresenceUpdateStatus.Idle });
+    client.user.setActivity('Lurking...');
 });
 
 client.on('interactionCreate', async interaction => {
