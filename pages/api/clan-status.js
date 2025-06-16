@@ -4,9 +4,9 @@ import iconv from 'iconv-lite';
 const SUPABASE_URL = process.env.SUPABASE_URL;
 const SUPABASE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY;
 const CRON_SECRET = process.env.CRON_SECRET;
+const DISCORD_WEBHOOK_URL = process.env.DISCORD_WEBHOOK_URL;
 
 const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
-
 const CLAN_NAME = 'remenant';
 const CLAN_API_URL = `http://services.runescape.com/m=clan-hiscores/members_lite.ws?clanName=${CLAN_NAME}`;
 
@@ -38,19 +38,12 @@ export default async function handler(req, res) {
     const members = lines.map(line => {
       const cols = line.split(',');
 
-      const name = cols[0]
-        .replace(/\s+/g, ' ')
-        .trim()
-        .normalize('NFC');
-
-      const rank = cols[1]
-        .trim()
-        .normalize('NFC');
+      const name = cols[0].replace(/\s+/g, ' ').trim().normalize('NFC');
+      const rank = cols[1].trim().normalize('NFC');
 
       return { name, rank };
     });
 
-    // Fetch current data from database
     const { data: existingMembers, error: selectError } = await supabase
       .from('clan_members')
       .select('name, rank, previous_rank, joined');
@@ -76,7 +69,6 @@ export default async function handler(req, res) {
       const existing = existingMap[member.name];
 
       if (!existing) {
-        // New member
         const newMember = {
           name: member.name,
           rank: member.rank,
@@ -95,11 +87,9 @@ export default async function handler(req, res) {
 
         changes.newMembers.push(newMember);
       } else {
-        // Existing member — check for rank change
         const rankChanged = existing.rank !== member.rank;
 
         if (rankChanged) {
-          // Update member with new rank and previous rank
           const { error: updateError } = await supabase
             .from('clan_members')
             .update({
@@ -113,7 +103,6 @@ export default async function handler(req, res) {
             return res.status(500).json({ error: 'Database update error' });
           }
 
-          // Insert a new record in rank_change_history
           const { error: historyError } = await supabase
             .from('rank_change_history')
             .insert([{
@@ -138,7 +127,6 @@ export default async function handler(req, res) {
       }
     }
 
-    // ✅ Save last update timestamp
     const { error: metaError } = await supabase
       .from('metadata')
       .upsert({ key: 'last_clan_update', value: now });
@@ -146,6 +134,17 @@ export default async function handler(req, res) {
     if (metaError) {
       console.error('Failed to update metadata:', metaError);
     }
+
+    // ✅ Merge joined dates with current member list
+    const membersWithJoin = members.map(m => {
+      const existing = existingMap[m.name];
+      return {
+        ...m,
+        joined: existing?.joined || now
+      };
+    });
+
+    await sendPromotionsWebhook(membersWithJoin);
 
     return res.status(200).json({
       changes,
@@ -158,5 +157,57 @@ export default async function handler(req, res) {
       error: 'Internal server error',
       details: err.message || err.toString(),
     });
+  }
+}
+
+// 🔽 ADD THIS HELPER TO THE BOTTOM 🔽
+
+function daysInRank(joined) {
+  const diff = Date.now() - new Date(joined).getTime();
+  return Math.floor(diff / (1000 * 60 * 60 * 24));
+}
+
+async function sendPromotionsWebhook(members) {
+  const promotionTimes = { recruit: 7, lieutenant: 91 };
+  const validPromotions = { recruit: 'Lieutenant', lieutenant: 'Captain' };
+
+  const eligible = members
+    .map(m => ({
+      ...m,
+      days: daysInRank(m.joined),
+      nextRank: validPromotions[m.rank.toLowerCase()] ?? null
+    }))
+    .filter(m => m.nextRank && m.days >= (promotionTimes[m.rank.toLowerCase()] || Infinity));
+
+  if (eligible.length === 0) {
+    console.log('Test');
+    return;
+  }
+
+  const embed = {
+    title: '📢 Eligible for Promotion',
+    color: 0xFF69B4,
+    description: eligible
+      .sort((a, b) => b.days - a.days)
+      .map(m => `• **${m.name}** — ${m.rank} (${m.days} days) → **${m.nextRank}**`)
+      .join('\n'),
+    timestamp: new Date().toISOString(),
+  };
+
+  const payload = {
+    username: 'GalaxyBot',
+    embeds: [embed],
+  };
+
+  const res = await fetch(DISCORD_WEBHOOK_URL, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(payload),
+  });
+
+  if (!res.ok) {
+    console.error('❌ Failed to send webhook:', res.status);
+  } else {
+    console.log('✅ Sent promotions message via webhook.');
   }
 }
