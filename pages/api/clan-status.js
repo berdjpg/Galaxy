@@ -180,7 +180,21 @@ async function sendPromotionsWebhook(members) {
     .filter(m => m.nextRank && m.days >= (promotionTimes[m.rank.toLowerCase()] || Infinity));
 
   if (eligible.length === 0) {
-    console.log('Test');
+    console.log('No promotions needed');
+
+     await fetch(process.env.DISCORD_WEBHOOK_URL, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      username: 'GalaxyBot',
+      embeds: [{
+        title: '✅ No Promotions Today',
+        description: 'All caught up — no clan members are currently eligible for promotion.',
+        color: 0x2ECC71, // green
+        timestamp: new Date().toISOString(),
+      }]
+    })
+  });
     return;
   }
 
@@ -195,7 +209,7 @@ async function sendPromotionsWebhook(members) {
   };
 
   const payload = {
-    username: 'Milkman',
+    username: '',
     embeds: [embed],
   };
 
