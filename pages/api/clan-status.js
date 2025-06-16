@@ -186,10 +186,10 @@ async function sendPromotionsWebhook(members) {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({
-      username: 'GalaxyBot',
+      username: 'Milkman',
       embeds: [{
-        title: '✅ No Promotions Today',
-        description: 'All caught up — no clan members are currently eligible for promotion.',
+        title: 'test',
+        description: 'thats gay',
         color: 0x2ECC71, // green
         timestamp: new Date().toISOString(),
       }]
