@@ -195,7 +195,7 @@ async function sendPromotionsWebhook(members) {
   };
 
   const payload = {
-    username: 'GalaxyBot',
+    username: 'Milkman',
     embeds: [embed],
   };
 
