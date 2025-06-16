@@ -181,20 +181,6 @@ async function sendPromotionsWebhook(members) {
 
   if (eligible.length === 0) {
     console.log('No promotions needed');
-
-     await fetch(process.env.DISCORD_WEBHOOK_URL, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({
-      username: 'Milkman',
-      embeds: [{
-        title: 'test',
-        description: 'thats gay',
-        color: 0x2ECC71, // green
-        timestamp: new Date().toISOString(),
-      }]
-    })
-  });
     return;
   }
 
