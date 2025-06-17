@@ -20,8 +20,8 @@ function formatDate(timestamp, full = false) {
 
 const promotionTimes = {
   recruit: 7,
-  corporal: 0,
-  sergeant: 0,
+  corporal: 7,
+  sergeant: 7,
   lieutenant: 91,
   captain: 0,
   general: 0,
@@ -185,6 +185,8 @@ useEffect(() => {
 
   const validPromotions = {
   recruit: 'lieutenant',
+  corporal: 'lieutenant', 
+  sergeant: 'lieutenant', 
   lieutenant: 'captain',
   };
 

@@ -168,8 +168,19 @@ function daysInRank(joined) {
 }
 
 async function sendPromotionsWebhook(members) {
-  const promotionTimes = { recruit: 7, lieutenant: 91 };
-  const validPromotions = { recruit: 'Lieutenant', lieutenant: 'Captain' };
+  const promotionTimes = { 
+    recruit: 7, 
+    corporal: 7, 
+    sergeant: 7, 
+    lieutenant: 91 
+  };
+
+  const validPromotions = { 
+    recruit: 'Lieutenant', 
+    corporal: 'Lieutenant', 
+    sergeant: 'Lieutenant', 
+    lieutenant: 'Captain' 
+  };
 
   const eligible = members
     .map(m => ({
