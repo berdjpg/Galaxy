@@ -204,6 +204,15 @@ useEffect(() => {
     return rank.replace(/\s+/g, "_"); // default
   }
 
+  function getNextMidnightUTC() {
+    const now = new Date();
+    const nextUTC = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate() + 1));
+    const hours = String(nextUTC.getUTCHours()).padStart(2, '0');
+    const minutes = String(nextUTC.getUTCMinutes()).padStart(2, '0');
+    return `${nextUTC.toISOString().split('T')[0]} ${hours}:${minutes} UTC`;
+  }
+
+
   if (loading)
     return (
       <div className="loading-container">
@@ -640,6 +649,21 @@ body::before {
   font-size: 0.875rem;
 }
 
+.top-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 2rem;
+  flex-wrap: wrap;
+}
+
+.update-info {
+  font-size: 0.95rem;
+  color: #94a3b8;
+  text-align: right;
+}
+
+
 /* Responsive */
 @media (max-width: 768px) {
   .container {
@@ -666,10 +690,20 @@ body::before {
       `}</style>
 
       <div className="container">
+
+        <div className="top-header">
+          <h1 className="main-title">Clan Dashboard</h1>
+          <div className="update-info">
+            <div>Last update: {lastUpdate ? formatDate(lastUpdate, true) : '...'}</div>
+            <div>Next update: {getNextMidnightUTC()}</div>
+          </div>
+        </div>
+
         {/* Header */}
         <div className="header">
           <div className="header-title">
             <h1 className="main-title">Remenant</h1>
+            <p>Last updated: {lastUpdate ? formatDate(lastUpdate, true) : '...'}</p>
           </div>
         </div>
 
