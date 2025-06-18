@@ -253,6 +253,7 @@ useEffect(() => {
         <div className="glow-spinner" />
         <p className="loading-text">Loading Remenant data...</p>
       </div>
+      
       <style jsx>{`
         .enhanced-loading {
           text-align: center;
