@@ -496,6 +496,14 @@ body::before {
   box-shadow: 0 0 0 3px rgba(6, 182, 212, 0.2);
 }
 
+.member-count {
+  margin-top: 0.5rem;
+  font-size: 0.875rem;
+  color: #94a3b8; /* muted slate tone */
+  text-align: left;
+  padding-left: 0.25rem;
+}
+
 /* Table */
 .table-container {
   background: rgba(15, 23, 42, 0.6);
@@ -689,6 +697,17 @@ body::before {
 
 /* Responsive */
 @media (max-width: 768px) {
+
+  .search-section {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .member-count {
+    margin-top: 0;
+    padding-left: 1rem;
+  }
   .container {
     padding: 1rem;
   }
@@ -766,7 +785,7 @@ body::before {
         {/* Search */}
         <div className="search-section">
           <div className="search-container">
-            <span className="search-icon">🔍</span>
+            <i className="search-icon">🔍</i>
             <input
               type="text"
               placeholder="Search members..."
@@ -775,11 +794,13 @@ body::before {
               className="search-input"
             />
           </div>
+          <div className="member-count">
+            Showing {filteredSortedMembers.length} member{filteredSortedMembers.length !== 1 && 's'}
+          </div>
         </div>
 
         {/* Table */}
         <div className="table-container">
-          <p>Showing {filteredSortedMembers.length} of {members.length} members</p>
           <table className="table">
             <thead className="table-header">
               <tr>
