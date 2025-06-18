@@ -264,7 +264,9 @@ useEffect(() => {
           padding: 0;
           min-height: 100%;
           height: auto;
-          background: #071b25 url('/images/background-main.jpg') repeat 0 0;
+          background-color: #071b25;
+          background-image: url('/images/background-main.jpg');
+          background-repeat: repeat;
           color: #d1d5db;
           font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
           -webkit-font-smoothing: antialiased;
