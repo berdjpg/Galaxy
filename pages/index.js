@@ -1,4 +1,5 @@
 import { useEffect, useState, useMemo } from 'react';
+import Head from 'next/head';
 
 function formatDate(timestamp, full = false) {
   if (!timestamp) return 'Unknown';
@@ -806,6 +807,12 @@ body::before {
 }
 
       `}</style>
+
+      <>
+        <Head>
+          <title>Remenant homebase | Sani btw</title>
+        </Head>
+      </>
 
       <div className="container">
         {/* Header */}
