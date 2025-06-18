@@ -267,7 +267,7 @@ useEffect(() => {
           background-color: #071b25;
           background-image: url('/images/background-main.jpg');
           background-repeat: repeat;
-          color: #d1d5db;
+          color:rgb(0, 0, 0);
           font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
           -webkit-font-smoothing: antialiased;
           -moz-osx-font-smoothing: grayscale;
@@ -282,7 +282,7 @@ useEffect(() => {
           width: 4rem;
           height: 4rem;
           border: 4px solid rgba(255, 255, 255, 0.1);
-          border-top: 4px solid #38bdf8;
+          border-top: 4px solid rgb(78, 56, 248);
           border-radius: 50%;
           animation: spin 1s linear infinite, pulse-glow 1.5s ease-in-out infinite;
           margin: 0 auto 1rem;
@@ -290,7 +290,7 @@ useEffect(() => {
         }
 
         .loading-text {
-          color: #94a3b8;
+          color:rgb(0, 0, 0);
           font-size: 1.1rem;
           letter-spacing: 0.05em;
           font-family: 'Segoe UI', Roboto, sans-serif;
