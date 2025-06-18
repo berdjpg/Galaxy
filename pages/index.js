@@ -278,7 +278,7 @@ html, body, #__next {
   padding: 0;
   min-height: 100%;
   height: auto;
-  background: linear-gradient(135deg, #000000 0%, #0f172a 50%, #0a0f1c 100%);
+  background: #071b25 url('pages\images\background-main.jpg') repeat 0 0;
   color: #d1d5db;
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
   -webkit-font-smoothing: antialiased;
@@ -747,7 +747,7 @@ body::before {
           <h1 className="main-title">Remenant</h1>
           <div className="update-info">
             <div>Last update: {lastUpdate ? formatDate(lastUpdate, true) : '...'}</div>
-            <div>Next update: {nextUpdateCountdown}</div>
+            <div>Next update in {nextUpdateCountdown}</div>
           </div>
         </div>
 
