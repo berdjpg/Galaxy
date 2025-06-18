@@ -482,6 +482,9 @@ body::before {
   color: #64748b;
   font-size: 1.25rem;
   z-index: 1;
+  width: 20px;
+  height: 20px;
+  pointer-events: none;
 }
 
 .search-input {
@@ -518,7 +521,7 @@ body::before {
 .table-container {
   background: rgba(15, 23, 42, 0.6);
   backdrop-filter: blur(12px);
-  border: 1px solid rgba(148, 163, 184, 0.1);
+  border: 1px solid rgba(148, 163, 184, 0.25);
   border-radius: 1rem;
   overflow: hidden;
 }
@@ -530,7 +533,7 @@ body::before {
 
 .table-header {
   background: rgba(15, 23, 42, 0.8);
-  border-bottom: 1px solid rgba(148, 163, 184, 0.15);
+  border-bottom: 1px solid rgba(148, 163, 184, 0.25);
 }
 
 .table-header th {
@@ -795,7 +798,22 @@ body::before {
         {/* Search */}
         <div className="search-section">
           <div className="search-container">
-            <i className="search-icon">🔍</i>
+            <svg
+              className="search-icon"
+              xmlns="http://www.w3.org/2000/svg"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+              strokeWidth={2}
+              aria-hidden="true"
+              focusable="false"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                d="M21 21l-4.35-4.35m0 0a7.5 7.5 0 1 0-10.6-10.6 7.5 7.5 0 0 0 10.6 10.6z"
+              />
+            </svg>
             <input
               type="text"
               placeholder="Search members..."
@@ -804,6 +822,7 @@ body::before {
               className="search-input"
             />
           </div>
+
           <div className="member-count">
             Showing {filteredSortedMembers.length} member{filteredSortedMembers.length !== 1 && 's'}
           </div>
