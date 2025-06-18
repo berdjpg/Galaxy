@@ -247,14 +247,58 @@ useEffect(() => {
 
 
   if (loading)
-    return (
-      <div className="loading-container">
-        <div className="loading-content">
-          <div className="spinner"></div>
-          <p>Loading clan members...</p>
-        </div>
+  return (
+    <div className="loading-container">
+      <div className="enhanced-loading">
+        <div className="glow-spinner" />
+        <p className="loading-text">Loading Remenant data...</p>
       </div>
-    );
+      <style jsx>{`
+        .enhanced-loading {
+          text-align: center;
+          animation: fadeIn 0.8s ease-in-out;
+        }
+
+        .glow-spinner {
+          width: 4rem;
+          height: 4rem;
+          border: 4px solid rgba(255, 255, 255, 0.1);
+          border-top: 4px solid #38bdf8;
+          border-radius: 50%;
+          animation: spin 1s linear infinite, pulse-glow 1.5s ease-in-out infinite;
+          margin: 0 auto 1rem;
+          box-shadow: 0 0 8px rgba(56, 189, 248, 0.6);
+        }
+
+        .loading-text {
+          color: #94a3b8;
+          font-size: 1.1rem;
+          letter-spacing: 0.05em;
+          font-family: 'Segoe UI', Roboto, sans-serif;
+          animation: pulseText 1.6s ease-in-out infinite;
+        }
+
+        @keyframes spin {
+          to { transform: rotate(360deg); }
+        }
+
+        @keyframes pulse-glow {
+          0%, 100% { box-shadow: 0 0 8px rgba(56, 189, 248, 0.6); }
+          50% { box-shadow: 0 0 16px rgba(56, 189, 248, 0.8); }
+        }
+
+        @keyframes pulseText {
+          0%, 100% { opacity: 1; }
+          50% { opacity: 0.6; }
+        }
+
+        @keyframes fadeIn {
+          from { opacity: 0; transform: translateY(10px); }
+          to { opacity: 1; transform: translateY(0); }
+        }
+      `}</style>
+    </div>
+  );
 
   if (!members.length)
     return (
