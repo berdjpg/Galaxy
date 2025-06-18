@@ -204,13 +204,36 @@ useEffect(() => {
     return rank.replace(/\s+/g, "_"); // default
   }
 
-  function getNextMidnightUTC() {
+  const [nextUpdateCountdown, setNextUpdateCountdown] = useState('');
+
+function getNextMidnightUTCDate() {
+  const now = new Date();
+  const next = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate() + 1));
+  return next;
+}
+
+useEffect(() => {
+  function updateCountdown() {
     const now = new Date();
-    const nextUTC = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate() + 1));
-    const hours = String(nextUTC.getUTCHours()).padStart(2, '0');
-    const minutes = String(nextUTC.getUTCMinutes()).padStart(2, '0');
-    return `${nextUTC.toISOString().split('T')[0]} ${hours}:${minutes} UTC`;
+    const diff = getNextMidnightUTCDate() - now;
+
+    if (diff <= 0) {
+      setNextUpdateCountdown('Updating soon...');
+      return;
+    }
+
+    const hours = String(Math.floor(diff / (1000 * 60 * 60))).padStart(2, '0');
+    const minutes = String(Math.floor((diff / (1000 * 60)) % 60)).padStart(2, '0');
+    const seconds = String(Math.floor((diff / 1000) % 60)).padStart(2, '0');
+
+    setNextUpdateCountdown(`${hours}:${minutes}:${seconds}`);
   }
+
+  updateCountdown(); // Initial call
+  const interval = setInterval(updateCountdown, 1000);
+  return () => clearInterval(interval);
+}, []);
+
 
 
   if (loading)
@@ -690,20 +713,12 @@ body::before {
       `}</style>
 
       <div className="container">
-
+        {/* Header */}
         <div className="top-header">
           <h1 className="main-title">Clan Dashboard</h1>
           <div className="update-info">
             <div>Last update: {lastUpdate ? formatDate(lastUpdate, true) : '...'}</div>
-            <div>Next update: {getNextMidnightUTC()}</div>
-          </div>
-        </div>
-
-        {/* Header */}
-        <div className="header">
-          <div className="header-title">
-            <h1 className="main-title">Remenant</h1>
-            <p>Last updated: {lastUpdate ? formatDate(lastUpdate, true) : '...'}</p>
+            <div>Next update: {nextUpdateCountdown}</div>
           </div>
         </div>
 
