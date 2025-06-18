@@ -259,7 +259,7 @@ useEffect(() => {
           box-sizing: border-box;
         }
 
-        html, body, #__next {
+        html, body {
           margin: 0;
           padding: 0;
           min-height: 100%;
