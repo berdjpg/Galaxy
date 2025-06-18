@@ -779,6 +779,7 @@ body::before {
 
         {/* Table */}
         <div className="table-container">
+          <p>Showing {filteredSortedMembers.length} of {members.length} members</p>
           <table className="table">
             <thead className="table-header">
               <tr>
@@ -848,9 +849,7 @@ body::before {
 
         {/* Footer */}
         <div className="footer">
-          <p>Showing {filteredSortedMembers.length} of {members.length} members</p>
           <p>Milk men / Sani btw</p>
-          <p>Last updated: {lastUpdate ? formatDate(lastUpdate, true) : '...'}</p>
         </div>
       </div>
     </>
