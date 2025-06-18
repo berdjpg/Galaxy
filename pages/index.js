@@ -596,7 +596,7 @@ body::before {
 }
 
 .table-header {
-  background: rgba(15, 23, 42, 0.8);
+  background: url('https://www.runescape.com/img/rs3/global/header_bg_set.png') no-repeat left top,url('https://www.runescape.com/img/rs3/global/header_bg_set.png') no-repeat right center,url('https://www.runescape.com/img/rs3/global/header_bg_set.png') repeat-x center bottom;
   border-bottom: 1px solid rgba(148, 163, 184, 0.25);
 }
 
@@ -609,6 +609,8 @@ body::before {
   transition: all 0.3s ease;
   position: relative;
   user-select: none;
+  border-left: 1px solid #39444b;
+  box-shadow: inset 1px 0 0 #000;
 }
 
 .table-header th:hover {
