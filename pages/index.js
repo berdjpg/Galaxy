@@ -253,8 +253,24 @@ useEffect(() => {
         <div className="glow-spinner" />
         <p className="loading-text">Loading Remenant data...</p>
       </div>
-      
+
       <style jsx>{`
+      * {
+          box-sizing: border-box;
+        }
+
+        html, body, #__next {
+          margin: 0;
+          padding: 0;
+          min-height: 100%;
+          height: auto;
+          background: #071b25 url('/images/background-main.jpg') repeat 0 0;
+          color: #d1d5db;
+          font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+          -webkit-font-smoothing: antialiased;
+          -moz-osx-font-smoothing: grayscale;
+        }
+          
         .enhanced-loading {
           text-align: center;
           animation: fadeIn 0.8s ease-in-out;
