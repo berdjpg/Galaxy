@@ -715,7 +715,7 @@ body::before {
       <div className="container">
         {/* Header */}
         <div className="top-header">
-          <h1 className="main-title">Clan Dashboard</h1>
+          <h1 className="main-title">Remenant</h1>
           <div className="update-info">
             <div>Last update: {lastUpdate ? formatDate(lastUpdate, true) : '...'}</div>
             <div>Next update: {nextUpdateCountdown}</div>
