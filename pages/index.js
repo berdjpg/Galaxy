@@ -278,7 +278,7 @@ html, body, #__next {
   padding: 0;
   min-height: 100%;
   height: auto;
-  background: #071b25 url('/pages/images/background-main.jpg') repeat 0 0;
+  background: #071b25 url('../pages/images/background-main.jpg') repeat 0 0;
   color: #d1d5db;
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
   -webkit-font-smoothing: antialiased;
