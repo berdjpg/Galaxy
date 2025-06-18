@@ -222,17 +222,27 @@ useEffect(() => {
       return;
     }
 
-    const hours = String(Math.floor(diff / (1000 * 60 * 60))).padStart(2, '0');
-    const minutes = String(Math.floor((diff / (1000 * 60)) % 60)).padStart(2, '0');
-    const seconds = String(Math.floor((diff / 1000) % 60)).padStart(2, '0');
+    const totalMinutes = Math.floor(diff / (1000 * 60));
+    const hours = Math.floor(totalMinutes / 60);
+    const minutes = totalMinutes % 60;
 
-    setNextUpdateCountdown(`${hours}:${minutes}:${seconds}`);
+    let formatted;
+    if (hours >= 3) {
+      formatted = `${hours} hour${hours !== 1 ? 's' : ''}`;
+    } else if (hours >= 1) {
+      formatted = `${hours} hour${hours !== 1 ? 's' : ''} and ${minutes} minute${minutes !== 1 ? 's' : ''}`;
+    } else {
+      formatted = `${minutes} minute${minutes !== 1 ? 's' : ''}`;
+    }
+
+    setNextUpdateCountdown(formatted);
   }
 
   updateCountdown(); // Initial call
   const interval = setInterval(updateCountdown, 1000);
   return () => clearInterval(interval);
 }, []);
+
 
 
 
