@@ -160,8 +160,6 @@ export default async function handler(req, res) {
   }
 }
 
-// 🔽 ADD THIS HELPER TO THE BOTTOM 🔽
-
 function daysInRank(joined) {
   const diff = Date.now() - new Date(joined).getTime();
   return Math.floor(diff / (1000 * 60 * 60 * 24));
@@ -206,7 +204,7 @@ async function sendPromotionsWebhook(members) {
   };
 
   const payload = {
-    username: '',
+    username: 'Milkman',
     embeds: [embed],
   };
 
