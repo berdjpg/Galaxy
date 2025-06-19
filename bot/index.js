@@ -39,7 +39,15 @@ const commands = [
     .addStringOption(opt => opt.setName('name').setDescription('RuneScape username').setRequired(true)),
   new SlashCommandBuilder()
     .setName('promotions')
-    .setDescription('List currently eligible members for promotion')
+    .setDescription('List currently eligible members for promotion'),
+  new SlashCommandBuilder()
+  .setName('ignore')
+  .setDescription('Ignore a clan member from promotions')
+  .addStringOption(opt =>
+    opt.setName('name')
+      .setDescription('RuneScape username to ignore')
+      .setRequired(true)
+  )
 ].map(cmd => cmd.toJSON());
 
 const rest = new REST({ version: '10' }).setToken(process.env.DISCORD_TOKEN);
@@ -173,7 +181,33 @@ client.on('interactionCreate', async interaction => {
       console.error(err);
       interaction.editReply('⚠️ Sorry, there was an error fetching clan data.');
     }
+  } else if (interaction.commandName === 'ignore') {
+    const name = interaction.options.getString('name');
+    await interaction.deferReply();
+
+    try {
+      const res = await fetch(`${API_BASE}/ignore`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${process.env.CRON_SECRET}`
+        },
+        body: JSON.stringify({ name })
+      });
+
+      if (!res.ok) {
+        const errText = await res.text();
+        console.error('Failed to ignore member:', errText);
+        return interaction.editReply(`❌ Failed to ignore \`${name}\`.`);
+      }
+
+      interaction.editReply(`✅ \`${name}\` is now ignored from promotions.`);
+    } catch (err) {
+      console.error(err);
+      interaction.editReply('⚠️ Failed to communicate with the API.');
+    }
   }
+
 });
 
 client.login(process.env.DISCORD_TOKEN);
