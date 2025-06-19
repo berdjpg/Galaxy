@@ -193,35 +193,39 @@ async function sendPromotionsWebhook(members) {
     return;
   }
 
-  const embed = {
-    title: m.name,
-    color: 0xff24e9,
-    description: eligible
-      .sort((a, b) => b.days - a.days)
-      .map(m => `${m.rank} (${m.days} days) → Promote to **${m.nextRank}**`)
-      .join('\n'),
-    image: {
-      url: `http://secure.runescape.com/m=avatar-rs/${m.name}/chat.png`
-    },
-    timestamp: new Date().toISOString(),
-  };
+  // Sort eligible members first
+  eligible.sort((a, b) => b.days - a.days);
 
-  const payload = {
-    username: 'Milkman',
-    content: "### Promotion update",
-    tts: false,
-    embeds: [embed],
-  };
+  // Send one embed per eligible member
+  for (const m of eligible) {
+    const embed = {
+      title: `${m.name}`,
+      color: 0xff24e9,
+      description: `${m.rank} (${m.days} days) → Promote to **${m.nextRank}**`,
+      image: {
+        url: `http://secure.runescape.com/m=avatar-rs/${encodeURIComponent(m.name)}/chat.png`
+      },
+      timestamp: new Date().toISOString(),
+    };
 
-  const res = await fetch(DISCORD_WEBHOOK_URL, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(payload),
-  });
+    const payload = {
+      username: 'Milkman',
+      content: `### Promotion update`,
+      tts: false,
+      embeds: [embed],
+    };
 
-  if (!res.ok) {
-    console.error('❌ Failed to send webhook:', res.status);
-  } else {
-    console.log('✅ Sent promotions message via webhook.');
+    const res = await fetch(DISCORD_WEBHOOK_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload),
+    });
+
+    if (!res.ok) {
+      console.error(`❌ Failed to send webhook for ${m.name}:`, res.status);
+    } else {
+      console.log(`✅ Sent promotion message for ${m.name}`);
+    }
   }
+
 }
