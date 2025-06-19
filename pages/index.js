@@ -169,10 +169,12 @@ useEffect(() => {
 
   const readyForPromotion = useMemo(() => {
     return members.filter(m => {
+      if (m.ignore) return false;
       const days = getDaysInCurrentRank(m.name, m.rank, m.joined);
       return days !== null && isEligibleForPromotion(m.rank, days);
     });
   }, [members]);
+
 
   const handleSort = (key) => {
     if (sortKey === key) {
@@ -661,6 +663,10 @@ body::before {
   transition: background-color 0.3s ease;
 }
 
+.ignored-member {
+  opacity: 0.5;
+}
+
 .table-body tr:hover {
   background: rgba(148, 163, 184, 0.05);
 }
@@ -960,7 +966,7 @@ body::before {
                 const rankColor = rankColors[member.rank.toLowerCase()] || rankColors.recruit;
                 
                 return (
-                  <tr key={member.name}>
+                  <tr key={member.name} className={member.ignore ? 'ignored-member' : ''}>
                     <td>
                       <div className="member-cell">
                         <div className="member-avatar" style={{ background: rankColor }}>
