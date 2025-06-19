@@ -11,9 +11,7 @@ require('dotenv').config();
 console.log('DISCORD_TOKEN starts with:', process.env.DISCORD_TOKEN?.slice(0, 5));
 const { Client, GatewayIntentBits, REST, Routes, SlashCommandBuilder, EmbedBuilder, ActivityType } = require('discord.js');
 const { fetch } = require('undici');
-const cron = require('node-cron'); // ✅ add this at top
-
-// Your bot code here (e.g., Discord client login)
+const cron = require('node-cron'); 
 
 
 const API_BASE = process.env.CLAN_API_BASE; // https://v0‑new‑project‑ptwxymzx9ew.vercel.app/api
@@ -41,13 +39,9 @@ const commands = [
     .setName('promotions')
     .setDescription('List currently eligible members for promotion'),
   new SlashCommandBuilder()
-  .setName('adminignore')
+  .setName('ignore')
   .setDescription('Ignore a clan member from promotions')
-  .addStringOption(opt =>
-    opt.setName('name')
-      .setDescription('RuneScape username to ignore')
-      .setRequired(true)
-  )
+  .addStringOption(opt => opt.setName('name').setDescription('RuneScape username to ignore').setRequired(true))
 ].map(cmd => cmd.toJSON());
 
 const rest = new REST({ version: '10' }).setToken(process.env.DISCORD_TOKEN);
@@ -181,7 +175,7 @@ client.on('interactionCreate', async interaction => {
       console.error(err);
       interaction.editReply('⚠️ Sorry, there was an error fetching clan data.');
     }
-  } else if (interaction.commandName === 'adminignore') {
+  } else if (interaction.commandName === 'ignore') {
     const name = interaction.options.getString('name');
     await interaction.deferReply();
 
