@@ -205,18 +205,42 @@ useEffect(() => {
     return rank.replace(/\s+/g, "_"); // default
   }
 
-  const [nextUpdateCountdown, setNextUpdateCountdown] = useState('');
+const [nextUpdateCountdown, setNextUpdateCountdown] = useState('');
 
-function getNextMidnightUTCDate() {
+function getNextScheduledUpdate() {
   const now = new Date();
-  const next = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate() + 1));
-  return next;
+  const utcNow = new Date(Date.UTC(
+    now.getUTCFullYear(),
+    now.getUTCMonth(),
+    now.getUTCDate(),
+    now.getUTCHours(),
+    now.getUTCMinutes(),
+    now.getUTCSeconds()
+  ));
+
+  const nextMidday = new Date(Date.UTC(
+    utcNow.getUTCFullYear(),
+    utcNow.getUTCMonth(),
+    utcNow.getUTCDate(),
+    12
+  ));
+
+  const nextMidnight = new Date(Date.UTC(
+    utcNow.getUTCFullYear(),
+    utcNow.getUTCMonth(),
+    utcNow.getUTCDate() + 1,
+    0
+  ));
+
+  // If it's before midday, midday is next. Otherwise, it's midnight.
+  return utcNow < nextMidday ? nextMidday : nextMidnight;
 }
 
 useEffect(() => {
   function updateCountdown() {
     const now = new Date();
-    const diff = getNextMidnightUTCDate() - now;
+    const nextUpdate = getNextScheduledUpdate();
+    const diff = nextUpdate - now;
 
     if (diff <= 0) {
       setNextUpdateCountdown('Updating soon...');
@@ -243,6 +267,7 @@ useEffect(() => {
   const interval = setInterval(updateCountdown, 1000);
   return () => clearInterval(interval);
 }, []);
+
 
 
 

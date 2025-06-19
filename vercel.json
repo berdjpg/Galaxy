@@ -3,6 +3,10 @@
     {
       "path": "/api/clan-status",
       "schedule": "0 0 * * *"
+    },
+    {
+      "path": "/api/clan-status",
+      "schedule": "0 12 * * *"
     }
   ]
 }
