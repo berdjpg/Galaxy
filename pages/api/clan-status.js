@@ -198,7 +198,7 @@ async function sendPromotionsWebhook(members) {
     color: 0xFF69B4,
     description: eligible
       .sort((a, b) => b.days - a.days)
-      .map(m => `• **${m.name}** — ${m.rank} (${m.days} days) → **${m.nextRank}**`)
+      .map(m => `• **${m.name}** — ${m.rank} (${m.days} days) → Promote to **${m.nextRank}**`)
       .join('\n'),
     timestamp: new Date().toISOString(),
   };
