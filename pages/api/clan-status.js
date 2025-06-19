@@ -46,7 +46,7 @@ export default async function handler(req, res) {
 
     const { data: existingMembers, error: selectError } = await supabase
       .from('clan_members')
-      .select('name, rank, previous_rank, joined');
+      .select('name, rank, previous_rank, joined, ignore');
 
     if (selectError) {
       console.error('Supabase select error:', selectError);
@@ -140,7 +140,8 @@ export default async function handler(req, res) {
       const existing = existingMap[m.name];
       return {
         ...m,
-        joined: existing?.joined || now
+        joined: existing?.joined || now,
+        ignore: existing?.ignore || false,
       };
     });
 
@@ -186,7 +187,7 @@ async function sendPromotionsWebhook(members) {
       days: daysInRank(m.joined),
       nextRank: validPromotions[m.rank.toLowerCase()] ?? null
     }))
-    .filter(m => m.nextRank && m.days >= (promotionTimes[m.rank.toLowerCase()] || Infinity));
+    .filter(m => !m.ignore && m.nextRank && m.days >= (promotionTimes[m.rank.toLowerCase()] || Infinity));
 
   if (eligible.length === 0) {
     console.log('No promotions needed');
