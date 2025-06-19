@@ -194,17 +194,22 @@ async function sendPromotionsWebhook(members) {
   }
 
   const embed = {
-    title: '📢 Eligible for Promotion',
-    color: 0xFF69B4,
+    title: m.name,
+    color: 0xff24e9,
     description: eligible
       .sort((a, b) => b.days - a.days)
-      .map(m => `• **${m.name}** — ${m.rank} (${m.days} days) → Promote to **${m.nextRank}**`)
+      .map(m => `${m.rank} (${m.days} days) → Promote to **${m.nextRank}**`)
       .join('\n'),
+    image: {
+      url: `http://secure.runescape.com/m=avatar-rs/${m.name}/chat.png`
+    },
     timestamp: new Date().toISOString(),
   };
 
   const payload = {
     username: 'Milkman',
+    content: "### Promotion update",
+    tts: false,
     embeds: [embed],
   };
 
