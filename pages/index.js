@@ -583,7 +583,7 @@ body::before {
 
 /* Table */
 .table-container {
-  background: rgba(15, 23, 42, 0.6);
+  background: rgba(24, 37, 45, .5);
   backdrop-filter: blur(12px);
   border: 1px solid rgba(148, 163, 184, 0.25);
   border-radius: 1rem;
@@ -614,7 +614,7 @@ body::before {
 }
 
 .table-header th:hover {
-  background: rgba(148, 163, 184, 0.05);
+  background: rgba(0,0,0,.33);
   color: #06b6d4;
 }
 
@@ -631,7 +631,8 @@ body::before {
 }
 
 .table-body tr {
-  border-bottom: 1px solid rgba(148, 163, 184, 0.1);
+  border-bottom: 1px solid #2a3339;
+  box-shadow: inset 0 1px 0 #000;
   transition: background-color 0.3s ease;
 }
 
