@@ -41,7 +41,7 @@ const commands = [
     .setName('promotions')
     .setDescription('List currently eligible members for promotion'),
   new SlashCommandBuilder()
-  .setName('ignore')
+  .setName('adminignore')
   .setDescription('Ignore a clan member from promotions')
   .addStringOption(opt =>
     opt.setName('name')
@@ -181,7 +181,7 @@ client.on('interactionCreate', async interaction => {
       console.error(err);
       interaction.editReply('⚠️ Sorry, there was an error fetching clan data.');
     }
-  } else if (interaction.commandName === 'ignore') {
+  } else if (interaction.commandName === 'adminignore') {
     const name = interaction.options.getString('name');
     await interaction.deferReply();
 
