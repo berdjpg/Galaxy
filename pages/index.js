@@ -222,7 +222,7 @@ function getNextScheduledUpdate() {
     utcNow.getUTCFullYear(),
     utcNow.getUTCMonth(),
     utcNow.getUTCDate(),
-    18
+    12
   ));
 
   const nextMidnight = new Date(Date.UTC(
