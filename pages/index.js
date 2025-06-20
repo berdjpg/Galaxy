@@ -949,7 +949,6 @@ body::before {
                     {sortKey === 'importance' ? (sortAsc ? '↑' : '↓') : '↕'}
                   </span>
                 </th>
-                <th>Clan XP</th>
                 <th onClick={() => handleSort('joined')} className={sortKey === 'joined' ? 'active' : ''}>
                   📅 Joined
                   <span className="sort-indicator">
@@ -983,7 +982,6 @@ body::before {
                         {member.rank}
                       </span>
                     </td>
-                    <td>{member.clanxp}</td>
                     <td>{formatDate(member.joined)}</td>
                     <td>{getMembershipDuration(member.joined)}</td>
                     <td>
