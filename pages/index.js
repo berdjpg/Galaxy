@@ -949,13 +949,13 @@ body::before {
                     {sortKey === 'importance' ? (sortAsc ? '↑' : '↓') : '↕'}
                   </span>
                 </th>
+                <th>Clan XP</th>
                 <th onClick={() => handleSort('joined')} className={sortKey === 'joined' ? 'active' : ''}>
                   📅 Joined
                   <span className="sort-indicator">
                     {sortKey === 'joined' ? (sortAsc ? '↑' : '↓') : '↕'}
                   </span>
                 </th>
-                <th>Clan XP</th>
                 <th>Duration</th>
                 <th>Status</th>
               </tr>

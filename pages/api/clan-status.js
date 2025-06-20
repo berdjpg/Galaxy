@@ -1,5 +1,7 @@
 import { createClient } from '@supabase/supabase-js';
 import iconv from 'iconv-lite';
+import fetch from 'node-fetch';
+import cheerio from 'cheerio';
 
 const SUPABASE_URL = process.env.SUPABASE_URL;
 const SUPABASE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY;
@@ -8,7 +10,7 @@ const DISCORD_WEBHOOK_URL = process.env.DISCORD_WEBHOOK_URL;
 
 async function fetchClanXpData(clanName) {
   let page = 1;
-  const pageSize = 500;
+  const pageSize = 500; // Adjust if necessary
   let allMembers = [];
   let hasMore = true;
 
@@ -20,12 +22,29 @@ async function fetchClanXpData(clanName) {
       throw new Error(`Failed to fetch clan XP data on page ${page}`);
     }
 
-    const data = await res.json();
-    if (data.members && Array.isArray(data.members)) {
-      allMembers.push(...data.members);
+    const html = await res.text();
+    const $ = cheerio.load(html);
+
+    const rows = $('table.members-list tbody tr');
+
+    if (rows.length === 0) {
+      hasMore = false;
+      break;
     }
 
-    hasMore = data.hasMorePages;
+    rows.each((_, el) => {
+      const cells = $(el).find('td');
+
+      // Adjust these indexes if the table structure changes
+      const name = $(cells[0]).text().trim().normalize('NFC');
+      const rank = $(cells[1]).text().trim().normalize('NFC');
+      const clanXpStr = $(cells[3]).text().trim().replace(/,/g, '');
+      const clanXp = Number(clanXpStr) || 0;
+
+      allMembers.push({ name, rank, clanXp });
+    });
+
+    hasMore = rows.length === pageSize;
     page++;
   }
 
@@ -70,9 +89,10 @@ export default async function handler(req, res) {
       return { name, rank };
     });
 
+    // Scrape clan XP from the HTML hiscores page
     const clanXpData = await fetchClanXpData(CLAN_NAME);
 
-    // Create a lookup map from name → clanXp
+    // Create lookup map name -> clanXp
     const xpMap = {};
     clanXpData.forEach(member => {
       const name = member.name.replace(/\s+/g, ' ').trim().normalize('NFC');
@@ -102,7 +122,6 @@ export default async function handler(req, res) {
 
     for (const member of members) {
       const existing = existingMap[member.name];
-      const clanXpValue = xpMap[member.name] ?? 0;
 
       if (!existing) {
         const newMember = {
@@ -110,7 +129,7 @@ export default async function handler(req, res) {
           rank: member.rank,
           previous_rank: null,
           joined: now,
-          clanXp: clanXpValue,
+          clanXp: xpMap[member.name] ?? 0,
         };
 
         const { error: insertError } = await supabase
@@ -126,26 +145,20 @@ export default async function handler(req, res) {
       } else {
         const rankChanged = existing.rank !== member.rank;
 
-        const updateData = {
-          clanXp: clanXpValue,
-        };
-
         if (rankChanged) {
-          updateData.rank = member.rank;
-          updateData.previous_rank = existing.rank;
-        }
+          const { error: updateError } = await supabase
+            .from('clan_members')
+            .update({
+              rank: member.rank,
+              previous_rank: existing.rank,
+            })
+            .eq('name', member.name);
 
-        const { error: updateError } = await supabase
-          .from('clan_members')
-          .update(updateData)
-          .eq('name', member.name);
+          if (updateError) {
+            console.error('Update error for member', member.name, updateError);
+            return res.status(500).json({ error: 'Database update error' });
+          }
 
-        if (updateError) {
-          console.error('Update error for member', member.name, updateError);
-          return res.status(500).json({ error: 'Database update error' });
-        }
-
-        if (rankChanged) {
           const { error: historyError } = await supabase
             .from('rank_change_history')
             .insert([{
@@ -178,7 +191,7 @@ export default async function handler(req, res) {
       console.error('Failed to update metadata:', metaError);
     }
 
-    // ✅ Merge joined dates with current member list
+    // Merge joined dates with current member list
     const membersWithJoin = members.map(m => {
       const existing = existingMap[m.name];
       return {
@@ -238,10 +251,8 @@ async function sendPromotionsWebhook(members) {
     return;
   }
 
-  // Sort eligible members first
   eligible.sort((a, b) => b.days - a.days);
 
-  // Send one embed per eligible member
   for (const m of eligible) {
     const embed = {
       title: `${m.name}`,
