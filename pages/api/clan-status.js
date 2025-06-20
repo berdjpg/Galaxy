@@ -6,6 +6,33 @@ const SUPABASE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY;
 const CRON_SECRET = process.env.CRON_SECRET;
 const DISCORD_WEBHOOK_URL = process.env.DISCORD_WEBHOOK_URL;
 
+async function fetchClanXpData(clanName) {
+  let page = 1;
+  const pageSize = 500;
+  let allMembers = [];
+  let hasMore = true;
+
+  while (hasMore) {
+    const url = `https://secure.runescape.com/m=clan-hiscores/members.ws?clanName=${encodeURIComponent(clanName)}&pageSize=${pageSize}&pageNum=${page}`;
+    const res = await fetch(url);
+
+    if (!res.ok) {
+      throw new Error(`Failed to fetch clan XP data on page ${page}`);
+    }
+
+    const data = await res.json();
+    if (data.members && Array.isArray(data.members)) {
+      allMembers.push(...data.members);
+    }
+
+    hasMore = data.hasMorePages;
+    page++;
+  }
+
+  return allMembers;
+}
+
+
 const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
 const CLAN_NAME = 'remenant';
 const CLAN_API_URL = `http://services.runescape.com/m=clan-hiscores/members_lite.ws?clanName=${CLAN_NAME}`;
@@ -43,6 +70,16 @@ export default async function handler(req, res) {
 
       return { name, rank };
     });
+
+    const clanXpData = await fetchClanXpData(CLAN_NAME);
+
+    // Create a lookup map from name → clanXp
+    const xpMap = {};
+    clanXpData.forEach(member => {
+      const name = member.name.replace(/\s+/g, ' ').trim().normalize('NFC');
+      xpMap[name] = member.clanXp;
+    });
+
 
     const { data: existingMembers, error: selectError } = await supabase
       .from('clan_members')
@@ -142,8 +179,10 @@ export default async function handler(req, res) {
         ...m,
         joined: existing?.joined || now,
         ignore: existing?.ignore || false,
+        clanXp: xpMap[m.name] ?? null,
       };
     });
+
 
     await sendPromotionsWebhook(membersWithJoin);
 
