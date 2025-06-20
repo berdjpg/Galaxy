@@ -101,7 +101,7 @@ export default async function handler(req, res) {
 
     const { data: existingMembers, error: selectError } = await supabase
       .from('clan_members')
-      .select('name, rank, previous_rank, joined, ignore');
+      .select('name, rank, previous_rank, joined, ignore, clanXp');
 
     if (selectError) {
       console.error('Supabase select error:', selectError);
@@ -116,20 +116,23 @@ export default async function handler(req, res) {
     const changes = {
       newMembers: [],
       rankChanges: [],
+      xpChanges: [],
     };
 
     const now = new Date().toISOString();
 
     for (const member of members) {
       const existing = existingMap[member.name];
+      const newXp = xpMap[member.name] ?? 0;
 
       if (!existing) {
+        // New member insert with clanXp
         const newMember = {
           name: member.name,
           rank: member.rank,
           previous_rank: null,
           joined: now,
-          clanXp: xpMap[member.name] ?? 0,
+          clanXp: newXp,
         };
 
         const { error: insertError } = await supabase
@@ -143,15 +146,25 @@ export default async function handler(req, res) {
 
         changes.newMembers.push(newMember);
       } else {
+        // Check if rank changed
         const rankChanged = existing.rank !== member.rank;
+        // Check if clanXp changed
+        const xpChanged = existing.clanXp !== newXp;
 
-        if (rankChanged) {
+        if (rankChanged || xpChanged) {
+          // Build update object dynamically
+          const updateObj = {};
+          if (rankChanged) {
+            updateObj.rank = member.rank;
+            updateObj.previous_rank = existing.rank;
+          }
+          if (xpChanged) {
+            updateObj.clanXp = newXp;
+          }
+
           const { error: updateError } = await supabase
             .from('clan_members')
-            .update({
-              rank: member.rank,
-              previous_rank: existing.rank,
-            })
+            .update(updateObj)
             .eq('name', member.name);
 
           if (updateError) {
@@ -159,26 +172,36 @@ export default async function handler(req, res) {
             return res.status(500).json({ error: 'Database update error' });
           }
 
-          const { error: historyError } = await supabase
-            .from('rank_change_history')
-            .insert([{
-              member_name: member.name,
-              old_rank: existing.rank,
-              new_rank: member.rank,
-              changed_at: now,
-            }]);
+          if (rankChanged) {
+            const { error: historyError } = await supabase
+              .from('rank_change_history')
+              .insert([{
+                member_name: member.name,
+                old_rank: existing.rank,
+                new_rank: member.rank,
+                changed_at: now,
+              }]);
 
-          if (historyError) {
-            console.error('Insert error in rank_change_history for member', member.name, historyError);
-            return res.status(500).json({ error: 'Database history insert error' });
+            if (historyError) {
+              console.error('Insert error in rank_change_history for member', member.name, historyError);
+              return res.status(500).json({ error: 'Database history insert error' });
+            }
+
+            changes.rankChanges.push({
+              name: member.name,
+              oldRank: existing.rank,
+              newRank: member.rank,
+              joined: existing.joined,
+            });
           }
 
-          changes.rankChanges.push({
-            name: member.name,
-            oldRank: existing.rank,
-            newRank: member.rank,
-            joined: existing.joined,
-          });
+          if (xpChanged) {
+            changes.xpChanges.push({
+              name: member.name,
+              oldXp: existing.clanXp,
+              newXp: newXp,
+            });
+          }
         }
       }
     }
