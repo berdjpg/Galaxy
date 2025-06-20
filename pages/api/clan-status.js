@@ -17,6 +17,7 @@ async function fetchclanxpData(clanName) {
   while (hasMore) {
     const url = `https://secure.runescape.com/m=clan-hiscores/members.ws?clanName=${encodeURIComponent(clanName)}&pageSize=${pageSize}&pageNum=${page}`;
     const res = await fetch(url);
+    console.log(res);
 
     if (!res.ok) {
       throw new Error(`Failed to fetch clan XP data on page ${page}`);
@@ -40,7 +41,7 @@ async function fetchclanxpData(clanName) {
       const rank = $(cells[1]).text().trim().normalize('NFC');
       const clanxpStr = $(cells[3]).text().trim().replace(/,/g, '');
       const clanxp = Number(clanxpStr) || 0;
-      console.log(clanxp);
+      console.log("each 43");
 
       allMembers.push({ name, rank, clanxp });
     });
@@ -99,6 +100,8 @@ export default async function handler(req, res) {
     clanxpData.forEach(member => {
       const name = member.name.replace(/\s+/g, ' ').trim().normalize('NFC');
       xpMap[name] = member.clanxp;
+      console.log(member.clanxp);
+      console.log("foreachkickoff 103");
     });
 
     const { data: existingMembers, error: selectError } = await supabase
