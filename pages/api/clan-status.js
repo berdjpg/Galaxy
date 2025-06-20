@@ -39,10 +39,10 @@ const commands = [
     .setName('promotions')
     .setDescription('List currently eligible members for promotion'),
   new SlashCommandBuilder()
-  .setName('ignore')
-  .setDescription('Ignore a clan member from promotions')
-  .addStringOption(opt => opt.setName('name').setDescription('RuneScape username to ignore').setRequired(true))
-].map(cmd => cmd.toJSON());
+    .setName('ignore')
+    .setDescription('Ignore a clan member from promotions')
+    .addStringOption(opt => opt.setName('name').setDescription('RuneScape username to ignore').setRequired(true))
+  ].map(cmd => cmd.toJSON());
 
 const rest = new REST({ version: '10' }).setToken(process.env.DISCORD_TOKEN);
 
