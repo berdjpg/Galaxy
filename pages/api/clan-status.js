@@ -1,7 +1,7 @@
 import { createClient } from '@supabase/supabase-js';
 import iconv from 'iconv-lite';
 import fetch from 'node-fetch';
-import cheerio from 'cheerio';
+import * as cheerio from 'cheerio';
 
 const SUPABASE_URL = process.env.SUPABASE_URL;
 const SUPABASE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY;
