@@ -254,12 +254,14 @@ useEffect(() => {
     const minutes = totalMinutes % 60;
 
     let formatted;
-    if (hours >= 3) {
-      formatted = `${hours} hour${hours !== 1 ? 's' : ''}`;
+    if (hours >= 11) {
+      formatted = `imminent`;
+    } else if (hours >= 3) {
+      formatted = `in ${hours} hour${hours !== 1 ? 's' : ''}`;
     } else if (hours >= 1) {
-      formatted = `${hours} hour${hours !== 1 ? 's' : ''} and ${minutes} minute${minutes !== 1 ? 's' : ''}`;
+      formatted = `in ${hours} hour${hours !== 1 ? 's' : ''} and ${minutes} minute${minutes !== 1 ? 's' : ''}`;
     } else {
-      formatted = `${minutes} minute${minutes !== 1 ? 's' : ''}`;
+      formatted = `in ${minutes} minute${minutes !== 1 ? 's' : ''}`;
     }
 
     setNextUpdateCountdown(formatted);
@@ -854,7 +856,7 @@ body::before {
           <h1 className="main-title">Remenant</h1>
           <div className="update-info">
             <div>Last update: {lastUpdate ? formatDate(lastUpdate, true) : '...'}</div>
-            <div>Next update in {nextUpdateCountdown}</div>
+            <div>Next update {nextUpdateCountdown}</div>
           </div>
         </div>
 
