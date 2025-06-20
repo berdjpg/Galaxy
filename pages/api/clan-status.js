@@ -17,7 +17,6 @@ async function fetchclanxpData(clanName) {
   while (hasMore) {
     const url = `https://secure.runescape.com/m=clan-hiscores/members.ws?clanName=${encodeURIComponent(clanName)}&pageSize=${pageSize}&pageNum=${page}`;
     const res = await fetch(url);
-    console.log(res);
 
     if (!res.ok) {
       throw new Error(`Failed to fetch clan XP data on page ${page}`);
@@ -27,6 +26,7 @@ async function fetchclanxpData(clanName) {
     const $ = cheerio.load(html);
 
     const rows = $('table.members-list tbody tr');
+    console.log(rows);
 
     if (rows.length === 0) {
       hasMore = false;
