@@ -45,6 +45,8 @@ async function fetchclanxpData(clanName) {
     });
 
     hasMore = rows.length === pageSize;
+    console.log('Page', page, 'members with XP:', allMembers);
+
     page++;
   }
 
