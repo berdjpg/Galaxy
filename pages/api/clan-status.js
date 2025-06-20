@@ -164,7 +164,7 @@ export default async function handler(req, res) {
           }
 
           // Optional: slight delay to avoid hammering RuneMetrics
-          await delay(200);
+          await delay(1000);
         } catch (xpErr) {
           console.error(`Error fetching XP for ${member.name}:`, xpErr);
         }
