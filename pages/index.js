@@ -955,6 +955,7 @@ body::before {
                     {sortKey === 'joined' ? (sortAsc ? '↑' : '↓') : '↕'}
                   </span>
                 </th>
+                <th>Clan XP</th>
                 <th>Duration</th>
                 <th>Status</th>
               </tr>
@@ -982,6 +983,7 @@ body::before {
                         {member.rank}
                       </span>
                     </td>
+                    <td>{member.clanxp}</td>
                     <td>{formatDate(member.joined)}</td>
                     <td>{getMembershipDuration(member.joined)}</td>
                     <td>

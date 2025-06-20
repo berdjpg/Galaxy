@@ -32,7 +32,6 @@ async function fetchClanXpData(clanName) {
   return allMembers;
 }
 
-
 const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
 const CLAN_NAME = 'remenant';
 const CLAN_API_URL = `http://services.runescape.com/m=clan-hiscores/members_lite.ws?clanName=${CLAN_NAME}`;
@@ -80,7 +79,6 @@ export default async function handler(req, res) {
       xpMap[name] = member.clanXp;
     });
 
-
     const { data: existingMembers, error: selectError } = await supabase
       .from('clan_members')
       .select('name, rank, previous_rank, joined, ignore');
@@ -104,6 +102,7 @@ export default async function handler(req, res) {
 
     for (const member of members) {
       const existing = existingMap[member.name];
+      const clanXpValue = xpMap[member.name] ?? 0;
 
       if (!existing) {
         const newMember = {
@@ -111,6 +110,7 @@ export default async function handler(req, res) {
           rank: member.rank,
           previous_rank: null,
           joined: now,
+          clanXp: clanXpValue,
         };
 
         const { error: insertError } = await supabase
@@ -126,20 +126,26 @@ export default async function handler(req, res) {
       } else {
         const rankChanged = existing.rank !== member.rank;
 
+        const updateData = {
+          clanXp: clanXpValue,
+        };
+
         if (rankChanged) {
-          const { error: updateError } = await supabase
-            .from('clan_members')
-            .update({
-              rank: member.rank,
-              previous_rank: existing.rank,
-            })
-            .eq('name', member.name);
+          updateData.rank = member.rank;
+          updateData.previous_rank = existing.rank;
+        }
 
-          if (updateError) {
-            console.error('Update error for member', member.name, updateError);
-            return res.status(500).json({ error: 'Database update error' });
-          }
+        const { error: updateError } = await supabase
+          .from('clan_members')
+          .update(updateData)
+          .eq('name', member.name);
 
+        if (updateError) {
+          console.error('Update error for member', member.name, updateError);
+          return res.status(500).json({ error: 'Database update error' });
+        }
+
+        if (rankChanged) {
           const { error: historyError } = await supabase
             .from('rank_change_history')
             .insert([{
@@ -182,7 +188,6 @@ export default async function handler(req, res) {
         clanXp: xpMap[m.name] ?? null,
       };
     });
-
 
     await sendPromotionsWebhook(membersWithJoin);
 
@@ -267,5 +272,4 @@ async function sendPromotionsWebhook(members) {
       console.log(`✅ Sent promotion message for ${m.name}`);
     }
   }
-
 }
