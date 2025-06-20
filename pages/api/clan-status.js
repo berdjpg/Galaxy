@@ -8,7 +8,7 @@ const SUPABASE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY;
 const CRON_SECRET = process.env.CRON_SECRET;
 const DISCORD_WEBHOOK_URL = process.env.DISCORD_WEBHOOK_URL;
 
-async function fetchClanXpData(clanName) {
+async function fetchclanxpData(clanName) {
   let page = 1;
   const pageSize = 500; // Adjust if necessary
   let allMembers = [];
@@ -38,10 +38,10 @@ async function fetchClanXpData(clanName) {
       // Adjust these indexes if the table structure changes
       const name = $(cells[0]).text().trim().normalize('NFC');
       const rank = $(cells[1]).text().trim().normalize('NFC');
-      const clanXpStr = $(cells[3]).text().trim().replace(/,/g, '');
-      const clanXp = Number(clanXpStr) || 0;
+      const clanxpStr = $(cells[3]).text().trim().replace(/,/g, '');
+      const clanxp = Number(clanxpStr) || 0;
 
-      allMembers.push({ name, rank, clanXp });
+      allMembers.push({ name, rank, clanxp });
     });
 
     hasMore = rows.length === pageSize;
@@ -90,18 +90,18 @@ export default async function handler(req, res) {
     });
 
     // Scrape clan XP from the HTML hiscores page
-    const clanXpData = await fetchClanXpData(CLAN_NAME);
+    const clanxpData = await fetchclanxpData(CLAN_NAME);
 
-    // Create lookup map name -> clanXp
+    // Create lookup map name -> clanxp
     const xpMap = {};
-    clanXpData.forEach(member => {
+    clanxpData.forEach(member => {
       const name = member.name.replace(/\s+/g, ' ').trim().normalize('NFC');
-      xpMap[name] = member.clanXp;
+      xpMap[name] = member.clanxp;
     });
 
     const { data: existingMembers, error: selectError } = await supabase
       .from('clan_members')
-      .select('name, rank, previous_rank, joined, ignore, clanXp');
+      .select('name, rank, previous_rank, joined, ignore, clanxp');
 
     if (selectError) {
       console.error('Supabase select error:', selectError);
@@ -126,13 +126,13 @@ export default async function handler(req, res) {
       const newXp = xpMap[member.name] ?? 0;
 
       if (!existing) {
-        // New member insert with clanXp
+        // New member insert with clanxp
         const newMember = {
           name: member.name,
           rank: member.rank,
           previous_rank: null,
           joined: now,
-          clanXp: newXp,
+          clanxp: newXp,
         };
 
         const { error: insertError } = await supabase
@@ -148,8 +148,8 @@ export default async function handler(req, res) {
       } else {
         // Check if rank changed
         const rankChanged = existing.rank !== member.rank;
-        // Check if clanXp changed
-        const xpChanged = existing.clanXp !== newXp;
+        // Check if clanxp changed
+        const xpChanged = existing.clanxp !== newXp;
 
         if (rankChanged || xpChanged) {
           // Build update object dynamically
@@ -159,7 +159,7 @@ export default async function handler(req, res) {
             updateObj.previous_rank = existing.rank;
           }
           if (xpChanged) {
-            updateObj.clanXp = newXp;
+            updateObj.clanxp = newXp;
           }
 
           const { error: updateError } = await supabase
@@ -198,7 +198,7 @@ export default async function handler(req, res) {
           if (xpChanged) {
             changes.xpChanges.push({
               name: member.name,
-              oldXp: existing.clanXp,
+              oldXp: existing.clanxp,
               newXp: newXp,
             });
           }
@@ -221,7 +221,7 @@ export default async function handler(req, res) {
         ...m,
         joined: existing?.joined || now,
         ignore: existing?.ignore || false,
-        clanXp: xpMap[m.name] ?? null,
+        clanxp: xpMap[m.name] ?? null,
       };
     });
 
