@@ -1,5 +1,4 @@
 import { createClient } from '@supabase/supabase-js';
-import { setTimeout as delay } from 'timers/promises';
 import iconv from 'iconv-lite';
 
 const SUPABASE_URL = process.env.SUPABASE_URL;
@@ -127,49 +126,6 @@ export default async function handler(req, res) {
         }
       }
     }
-
-      // --- Fetch and store RuneMetrics XP for each member ---
-      for (const member of members) {
-        const username = encodeURIComponent(member.name.replace(/\u00a0/g, ' ')); // Clean name
-
-        try {
-          const xpResponse = await fetch(`https://apps.runescape.com/runemetrics/profile/profile?user=${username}&activities=0`);
-
-          if (!xpResponse.ok) {
-            console.warn(`RuneMetrics error for ${member.name}: ${xpResponse.status}`);
-            continue;
-          }
-
-          const xpData = await xpResponse.json();
-
-          if (xpData.error || typeof xpData.totalxp !== 'number') {
-            console.warn(`RuneMetrics returned error for ${member.name}: ${xpData.error || 'missing totalskillxp'}`);
-            continue;
-          }
-
-          const totalXp = xpData.totalxp;
-          const existing = existingMap[member.name];
-          const oldXp = existing?.total_xp ?? 0;
-          const xpGained = oldXp > 0 ? totalXp - oldXp : 0;
-
-          const { error: xpUpdateError } = await supabase
-            .from('clan_members')
-            .update({ total_xp: totalXp, xp_gained: xpGained })
-            .eq('name', member.name);
-
-          if (xpUpdateError) {
-            console.error(`Failed to update XP for ${member.name}:`, xpUpdateError);
-          } else {
-            console.log(`Updated XP for ${member.name}: ${totalXp} (${xpGained} gained)`);
-          }
-
-          // Optional: slight delay to avoid hammering RuneMetrics
-          await delay(2000);
-        } catch (xpErr) {
-          console.error(`Error fetching XP for ${member.name}:`, xpErr);
-        }
-      }
-
 
     const { error: metaError } = await supabase
       .from('metadata')
