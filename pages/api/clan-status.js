@@ -10,7 +10,7 @@ const DISCORD_WEBHOOK_URL = process.env.DISCORD_WEBHOOK_URL;
 
 async function fetchclanxpData(clanName) {
   let page = 1;
-  const pageSize = 500; // Adjust if necessary
+  const pageSize = 20; // Adjust if necessary
   let allMembers = [];
   let hasMore = true;
 
@@ -40,12 +40,12 @@ async function fetchclanxpData(clanName) {
       const rank = $(cells[1]).text().trim().normalize('NFC');
       const clanxpStr = $(cells[3]).text().trim().replace(/,/g, '');
       const clanxp = Number(clanxpStr) || 0;
+      console.log(clanxp);
 
       allMembers.push({ name, rank, clanxp });
     });
 
     hasMore = rows.length === pageSize;
-    console.log('Page', page, 'members with XP:', allMembers);
 
     page++;
   }
