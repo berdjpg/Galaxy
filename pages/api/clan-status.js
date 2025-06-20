@@ -142,12 +142,12 @@ export default async function handler(req, res) {
 
           const xpData = await xpResponse.json();
 
-          if (xpData.error || typeof xpData.totalskillxp !== 'number') {
+          if (xpData.error || typeof xpData.totalxp !== 'number') {
             console.warn(`RuneMetrics returned error for ${member.name}: ${xpData.error || 'missing totalskillxp'}`);
             continue;
           }
 
-          const totalXp = xpData.totalskillxp;
+          const totalXp = xpData.totalxp;
           const existing = existingMap[member.name];
           const oldXp = existing?.total_xp ?? 0;
           const xpGained = oldXp > 0 ? totalXp - oldXp : 0;
