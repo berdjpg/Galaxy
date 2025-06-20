@@ -245,7 +245,7 @@ useEffect(() => {
     const diff = nextUpdate - now;
 
     if (diff <= 0) {
-      setNextUpdateCountdown('Updating soon...');
+      setNextUpdateCountdown('happening shortly!');
       return;
     }
 
