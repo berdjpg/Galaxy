@@ -994,7 +994,7 @@ body::before {
         </div>
 
         {/* Table */}
-        <div className="content-layout" style={{ display: 'flex', gap: '2rem', alignItems: 'flex-start' }}></div>
+        <div className="content-layout" style={{ display: 'flex', gap: '2rem', alignItems: 'flex-start' }}>
           <div style={{ flex: 3 }}>
             <div className="table-container">
               <table className="table">
@@ -1080,6 +1080,7 @@ body::before {
               </div>
             </div>
           </div>
+        </div>
 
 
         {/* Footer */}
