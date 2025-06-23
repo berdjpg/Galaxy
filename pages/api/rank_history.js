@@ -2,23 +2,23 @@ import { createClient } from '@supabase/supabase-js';
 
 const SUPABASE_URL = process.env.SUPABASE_URL;
 const SUPABASE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY;
-const CRON_SECRET = process.env.CRON_SECRET;
 
 const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
 
 export default async function handler(req, res) {
   const { member } = req.query;
 
-  if (!member) {
-    return res.status(400).json({ error: 'Missing member query parameter' });
-  }
-
   try {
-    const { data, error } = await supabase
+    let query = supabase
       .from('rank_change_history')
-      .select('old_rank, new_rank, changed_at')
-      .eq('member_name', member)
+      .select('id, member_name, old_rank, new_rank, changed_at')
       .order('changed_at', { ascending: false });
+
+    if (member) {
+      query = query.eq('member_name', member);
+    }
+
+    const { data, error } = await query;
 
     if (error) {
       console.error('Supabase error:', error);
