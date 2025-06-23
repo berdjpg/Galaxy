@@ -835,7 +835,8 @@ body::before {
 
 .rank-history-sidebar h3 {
   color: #f8fafc;
-  font-size: 1.25rem;
+  font-size: 1rem;
+  font-weight: 500;
   margin-top: unset;
   margin-bottom: unset;
   min-height: 53.5px;
