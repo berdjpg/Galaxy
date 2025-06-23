@@ -273,6 +273,23 @@ useEffect(() => {
 }, []);
 
 
+const [rankHistory, setRankHistory] = useState([]);
+
+useEffect(() => {
+  async function fetchRankHistory() {
+    try {
+      const res = await fetch('/api/rank_history');
+      const data = await res.json();
+      setRankHistory(data);
+    } catch (err) {
+      console.error('Error fetching rank history:', err);
+    }
+  }
+  fetchRankHistory();
+}, []);
+
+
+
 
 
 
@@ -808,6 +825,48 @@ body::before {
 }
 
 
+.rank-history-sidebar {
+  background: rgba(15, 23, 42, 0.7);
+  border: 1px solid rgba(148, 163, 184, 0.2);
+  border-radius: 1rem;
+  padding: 1rem;
+  max-height: 600px;
+  overflow-y: auto;
+  margin-top: 2rem;
+}
+
+.rank-history-sidebar h3 {
+  color: #f8fafc;
+  margin-bottom: 1rem;
+  font-size: 1.25rem;
+}
+
+.rank-history-item {
+  padding: 0.5rem 0;
+  border-bottom: 1px solid rgba(148, 163, 184, 0.1);
+}
+
+.rank-history-name {
+  font-weight: 600;
+  color: #f1f5f9;
+}
+
+.rank-history-change {
+  font-size: 0.9rem;
+  color: #cbd5e1;
+}
+
+.old-rank, .new-rank {
+  text-transform: capitalize;
+}
+
+.rank-history-date {
+  font-size: 0.75rem;
+  color: #94a3b8;
+}
+
+
+
 /* Responsive */
 @media (max-width: 768px) {
 
@@ -935,73 +994,93 @@ body::before {
         </div>
 
         {/* Table */}
-        <div className="table-container">
-          <table className="table">
-            <thead className="table-header">
-              <tr>
-                <th onClick={() => handleSort('name')} className={sortKey === 'name' ? 'active' : ''}>
-                  Name
-                  <span className="sort-indicator">
-                    {sortKey === 'name' ? (sortAsc ? '↑' : '↓') : '↕'}
-                  </span>
-                </th>
-                <th onClick={() => handleSort('importance')} className={sortKey === 'importance' ? 'active' : ''}>
-                  Rank
-                  <span className="sort-indicator">
-                    {sortKey === 'importance' ? (sortAsc ? '↑' : '↓') : '↕'}
-                  </span>
-                </th>
-                <th onClick={() => handleSort('joined')} className={sortKey === 'joined' ? 'active' : ''}>
-                  📅 Joined
-                  <span className="sort-indicator">
-                    {sortKey === 'joined' ? (sortAsc ? '↑' : '↓') : '↕'}
-                  </span>
-                </th>
-                <th>Duration</th>
-                <th>Status</th>
-              </tr>
-            </thead>
-            <tbody className="table-body">
-              {filteredSortedMembers.map((member, index) => {
-                const days = getDaysInCurrentRank(member.name, member.rank, member.joined);
-                const isEligible = days !== null && isEligibleForPromotion(member.rank, days);
-                const rankColor = rankColors[member.rank.toLowerCase()] || rankColors.recruit;
-                
-                return (
-                  <tr key={member.name} className={member.ignore ? 'ignored-member' : ''}>
-                    <td>
-                      <div className="member-cell">
-                        <div className="member-avatar" style={{ background: rankColor }}>
-                          {/* {member.name.charAt(0).toUpperCase()} */}
-                          <img src={`http://secure.runescape.com/m=avatar-rs/${member.name}/chat.png`} alt="Avatar" />
-                        </div>
-                        <span className="member-name-cell">{member.name}</span>
-                      </div>
-                    </td>
-                    <td>
-                      <span className="rank-badge" style={{ background: rankColor }}>
-                        <img src={`https://runescape.wiki/images/${formatRank(member.rank)}_clan_rank.png`} alt="Rank" />
-                        {member.rank}
+        <div className="content-layout" style={{ display: 'flex', gap: '2rem', alignItems: 'flex-start' }}></div>
+          <div style={{ flex: 3 }}>
+            <div className="table-container">
+              <table className="table">
+                <thead className="table-header">
+                  <tr>
+                    <th onClick={() => handleSort('name')} className={sortKey === 'name' ? 'active' : ''}>
+                      Name
+                      <span className="sort-indicator">
+                        {sortKey === 'name' ? (sortAsc ? '↑' : '↓') : '↕'}
                       </span>
-                    </td>
-                    <td>{formatDate(member.joined)}</td>
-                    <td>{getMembershipDuration(member.joined)}</td>
-                    <td>
-                      {isEligible ? (
-                        <span className="status-eligible">
-                          <span className="status-dot"></span>
-                          Eligible
-                        </span>
-                      ) : (
-                        <span className="status-inactive">—</span>
-                      )}
-                    </td>
+                    </th>
+                    <th onClick={() => handleSort('importance')} className={sortKey === 'importance' ? 'active' : ''}>
+                      Rank
+                      <span className="sort-indicator">
+                        {sortKey === 'importance' ? (sortAsc ? '↑' : '↓') : '↕'}
+                      </span>
+                    </th>
+                    <th onClick={() => handleSort('joined')} className={sortKey === 'joined' ? 'active' : ''}>
+                      📅 Joined
+                      <span className="sort-indicator">
+                        {sortKey === 'joined' ? (sortAsc ? '↑' : '↓') : '↕'}
+                      </span>
+                    </th>
+                    <th>Duration</th>
+                    <th>Status</th>
                   </tr>
-                );
-              })}
-            </tbody>
-          </table>
-        </div>
+                </thead>
+                <tbody className="table-body">
+                  {filteredSortedMembers.map((member, index) => {
+                    const days = getDaysInCurrentRank(member.name, member.rank, member.joined);
+                    const isEligible = days !== null && isEligibleForPromotion(member.rank, days);
+                    const rankColor = rankColors[member.rank.toLowerCase()] || rankColors.recruit;
+                    
+                    return (
+                      <tr key={member.name} className={member.ignore ? 'ignored-member' : ''}>
+                        <td>
+                          <div className="member-cell">
+                            <div className="member-avatar" style={{ background: rankColor }}>
+                              {/* {member.name.charAt(0).toUpperCase()} */}
+                              <img src={`http://secure.runescape.com/m=avatar-rs/${member.name}/chat.png`} alt="Avatar" />
+                            </div>
+                            <span className="member-name-cell">{member.name}</span>
+                          </div>
+                        </td>
+                        <td>
+                          <span className="rank-badge" style={{ background: rankColor }}>
+                            <img src={`https://runescape.wiki/images/${formatRank(member.rank)}_clan_rank.png`} alt="Rank" />
+                            {member.rank}
+                          </span>
+                        </td>
+                        <td>{formatDate(member.joined)}</td>
+                        <td>{getMembershipDuration(member.joined)}</td>
+                        <td>
+                          {isEligible ? (
+                            <span className="status-eligible">
+                              <span className="status-dot"></span>
+                              Eligible
+                            </span>
+                          ) : (
+                            <span className="status-inactive">—</span>
+                          )}
+                        </td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            </div>
+          </div>
+          <div style={{ flex: 1 }}>
+            <div className="rank-history-sidebar">
+              <h3>Rank History</h3>
+              <div className="rank-history-list">
+                {rankHistory.slice(0, 20).map((entry) => (
+                  <div key={entry.id} className="rank-history-item">
+                    <div className="rank-history-name">{entry.member_name}</div>
+                    <div className="rank-history-change">
+                      <span className="old-rank">{entry.old_rank}</span> ➡️ <span className="new-rank">{entry.new_rank}</span>
+                    </div>
+                    <div className="rank-history-date">{formatDate(entry.changed_at, true)}</div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+
 
         {/* Footer */}
         <div className="footer">
