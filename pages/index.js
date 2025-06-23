@@ -829,7 +829,6 @@ body::before {
   background: rgba(24, 37, 45, .5);
   border: 1px solid rgba(148, 163, 184, 0.2);
   border-radius: 1rem;
-  padding: 1rem;
   max-height: 600px;
   overflow-y: auto;
 }
@@ -837,7 +836,7 @@ body::before {
 .rank-history-sidebar h3 {
   color: #f8fafc;
   font-size: 1.25rem;
-  marrgin-top: unset;
+  margin-top: unset;
   margin-bottom: unset;
   min-height: 53.5px;
   line-height: 1;
