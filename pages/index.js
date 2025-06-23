@@ -826,7 +826,7 @@ body::before {
 
 
 .rank-history-sidebar {
-  background: rgba(15, 23, 42, 0.7);
+  background: rgba(24, 37, 45, .5);
   border: 1px solid rgba(148, 163, 184, 0.2);
   border-radius: 1rem;
   padding: 1rem;
@@ -836,8 +836,18 @@ body::before {
 
 .rank-history-sidebar h3 {
   color: #f8fafc;
-  margin-bottom: 1rem;
   font-size: 1.25rem;
+  marrgin-top: unset;
+  margin-bottom: unset;
+  min-height: 53.5px;
+  line-height: 1;
+  padding: 1rem;
+  background: url('https://www.runescape.com/img/rs3/global/header_bg_set.png') no-repeat left top,url('https://www.runescape.com/img/rs3/global/header_bg_set.png') no-repeat right center,url('https://www.runescape.com/img/rs3/global/header_bg_set.png') repeat-x center bottom;
+  border-bottom: 1px solid rgba(148, 163, 184, 0.25);
+}
+
+.rank-history-list {
+  padding: 0.5rem 1rem;
 }
 
 .rank-history-item {
@@ -848,10 +858,12 @@ body::before {
 .rank-history-name {
   font-weight: 600;
   color: #f1f5f9;
+  font-size: 0.9rem;
+  margin-bottom: 0.15rem;
 }
 
 .rank-history-change {
-  font-size: 0.9rem;
+  font-size: 0.85rem;
   color: #cbd5e1;
 }
 
@@ -861,7 +873,7 @@ body::before {
 
 .rank-history-date {
   font-size: 0.75rem;
-  color: #94a3b8;
+  color: #606469;
 }
 
 
