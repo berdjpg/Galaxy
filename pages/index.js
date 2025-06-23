@@ -832,7 +832,6 @@ body::before {
   padding: 1rem;
   max-height: 600px;
   overflow-y: auto;
-  margin-top: 2rem;
 }
 
 .rank-history-sidebar h3 {
