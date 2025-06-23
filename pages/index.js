@@ -840,7 +840,6 @@ body::before {
   margin-top: unset;
   margin-bottom: unset;
   min-height: 53.5px;
-  line-height: 1;
   padding: 1rem;
   background: url('https://www.runescape.com/img/rs3/global/header_bg_set.png') no-repeat left top,url('https://www.runescape.com/img/rs3/global/header_bg_set.png') no-repeat right center,url('https://www.runescape.com/img/rs3/global/header_bg_set.png') repeat-x center bottom;
   border-bottom: 1px solid rgba(148, 163, 184, 0.25);
