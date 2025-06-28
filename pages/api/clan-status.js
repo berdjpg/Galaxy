@@ -167,66 +167,66 @@ function daysInRank(joined) {
 }
 
 async function sendPromotionsWebhook(members) {
-  const promotionTimes = { 
-    recruit: 7, 
-    corporal: 7, 
-    sergeant: 7, 
-    lieutenant: 91 
-  };
+  // const promotionTimes = { 
+  //   recruit: 7, 
+  //   corporal: 7, 
+  //   sergeant: 7, 
+  //   lieutenant: 91 
+  // };
 
-  const validPromotions = { 
-    recruit: 'Lieutenant', 
-    corporal: 'Lieutenant', 
-    sergeant: 'Lieutenant', 
-    lieutenant: 'Captain' 
-  };
+  // const validPromotions = { 
+  //   recruit: 'Lieutenant', 
+  //   corporal: 'Lieutenant', 
+  //   sergeant: 'Lieutenant', 
+  //   lieutenant: 'Captain' 
+  // };
 
-  const eligible = members
-    .map(m => ({
-      ...m,
-      days: daysInRank(m.joined),
-      nextRank: validPromotions[m.rank.toLowerCase()] ?? null
-    }))
-    .filter(m => !m.ignore && m.nextRank && m.days >= (promotionTimes[m.rank.toLowerCase()] || Infinity));
+  // const eligible = members
+  //   .map(m => ({
+  //     ...m,
+  //     days: daysInRank(m.joined),
+  //     nextRank: validPromotions[m.rank.toLowerCase()] ?? null
+  //   }))
+  //   .filter(m => !m.ignore && m.nextRank && m.days >= (promotionTimes[m.rank.toLowerCase()] || Infinity));
 
-  if (eligible.length === 0) {
-    console.log('No promotions needed');
-    return;
-  }
+  // if (eligible.length === 0) {
+  //   console.log('No promotions needed');
+  //   return;
+  // }
 
-  // Sort eligible members first
-  eligible.sort((a, b) => b.days - a.days);
+  // // Sort eligible members first
+  // eligible.sort((a, b) => b.days - a.days);
 
-  // Send one embed per eligible member
-  for (const m of eligible) {
-    const embed = {
-      title: `${m.name}`,
-      color: 0xff24e9,
-      description: `${m.rank} (${m.days} days) → Promote to **${m.nextRank}**`,
-      image: {
-        url: `http://secure.runescape.com/m=avatar-rs/${encodeURIComponent(m.name)}/chat.png`
-      },
-      timestamp: new Date().toISOString(),
-    };
+  // // Send one embed per eligible member
+  // for (const m of eligible) {
+  //   const embed = {
+  //     title: `${m.name}`,
+  //     color: 0xff24e9,
+  //     description: `${m.rank} (${m.days} days) → Promote to **${m.nextRank}**`,
+  //     image: {
+  //       url: `http://secure.runescape.com/m=avatar-rs/${encodeURIComponent(m.name)}/chat.png`
+  //     },
+  //     timestamp: new Date().toISOString(),
+  //   };
 
-    const payload = {
-      username: 'Milkman',
-      content: `### Promotion update`,
-      tts: false,
-      embeds: [embed],
-    };
+  //   const payload = {
+  //     username: 'Milkman',
+  //     content: `### Promotion update`,
+  //     tts: false,
+  //     embeds: [embed],
+  //   };
 
-    const res = await fetch(DISCORD_WEBHOOK_URL, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(payload),
-    });
+  //   const res = await fetch(DISCORD_WEBHOOK_URL, {
+  //     method: 'POST',
+  //     headers: { 'Content-Type': 'application/json' },
+  //     body: JSON.stringify(payload),
+  //   });
 
-    if (!res.ok) {
-      console.error(`❌ Failed to send webhook for ${m.name}:`, res.status);
-    } else {
-      console.log(`✅ Sent promotion message for ${m.name}`);
-    }
-  }
+  //   if (!res.ok) {
+  //     console.error(`❌ Failed to send webhook for ${m.name}:`, res.status);
+  //   } else {
+  //     console.log(`✅ Sent promotion message for ${m.name}`);
+  //   }
+  // }
 
 }
